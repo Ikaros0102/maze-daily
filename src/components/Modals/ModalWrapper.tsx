@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useId } from 'react';
 import { X } from 'lucide-react';
 
 interface ModalWrapperProps {
   title: string;
   isOpen: boolean;
   onClose: () => void;
-  isDarkTheme: boolean;
+  isDarkTheme?: boolean;
   children: React.ReactNode;
 }
 
@@ -15,6 +15,8 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({
   onClose,
   children,
 }) => {
+  const titleId = useId();
+
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -43,6 +45,9 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({
       }}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         className="glass-panel"
         onClick={(e) => e.stopPropagation()}
         style={{
@@ -73,12 +78,16 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({
               borderBottom: '1px solid var(--glass-border)',
             }}
           >
-            <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, letterSpacing: -0.3, color: 'var(--text)' }}>
+            <h2
+              id={titleId}
+              style={{ margin: 0, fontSize: 17, fontWeight: 700, letterSpacing: -0.3, color: 'var(--text)' }}
+            >
               {title}
             </h2>
             <button
               onClick={onClose}
               className="glass-btn"
+              aria-label="Close dialog"
               style={{
                 padding: '5px',
                 color: 'var(--muted)',
@@ -87,7 +96,7 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({
                 justifyContent: 'center',
               }}
             >
-              <X size={18} />
+              <X size={18} aria-hidden="true" />
             </button>
           </div>
 

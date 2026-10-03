@@ -1,8 +1,8 @@
 import React from 'react';
 import { GAME_CONFIG } from '../../config/gameConfig';
-import { TRANSLATIONS } from '../../utils/i18n';
+import { LANGUAGE_OPTIONS, TRANSLATIONS } from '../../utils/i18n';
 import { ModalWrapper } from './ModalWrapper';
-import type { GameSettings } from '../../types/game';
+import type { GameSettings, LanguageMode } from '../../types/game';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -56,16 +56,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         {/* Theme */}
         <div style={rowStyle}>
           <span style={{ fontSize: 14, fontWeight: 500 }}>{t.theme}</span>
-          <div style={btnGroupStyle}>
+          <div style={btnGroupStyle} role="group" aria-label={t.theme}>
             <button
               onClick={() => onUpdateSettings({ ...settings, theme: 'dark' })}
               style={getToggleBtnStyle(settings.theme === 'dark')}
+              aria-pressed={settings.theme === 'dark'}
             >
               {t.darkTheme}
             </button>
             <button
               onClick={() => onUpdateSettings({ ...settings, theme: 'light' })}
               style={getToggleBtnStyle(settings.theme === 'light')}
+              aria-pressed={settings.theme === 'light'}
             >
               {t.lightTheme}
             </button>
@@ -74,42 +76,74 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         {/* Language */}
         <div style={rowStyle}>
-          <span style={{ fontSize: 14, fontWeight: 500 }}>{t.language}</span>
-          <div style={btnGroupStyle}>
-            <button
-              onClick={() => onUpdateSettings({ ...settings, lang: 'en' })}
-              style={getToggleBtnStyle(settings.lang === 'en')}
-            >
-              EN
-            </button>
-            <button
-              onClick={() => onUpdateSettings({ ...settings, lang: 'ru' })}
-              style={getToggleBtnStyle(settings.lang === 'ru')}
-            >
-              RU
-            </button>
-          </div>
+          <label htmlFor="settings-language" style={{ fontSize: 14, fontWeight: 500 }}>
+            {t.language}
+          </label>
+          <select
+            id="settings-language"
+            value={settings.lang}
+            onChange={(e) => onUpdateSettings({ ...settings, lang: e.target.value as LanguageMode })}
+            aria-label={t.language}
+            style={{
+              padding: '6px 10px',
+              borderRadius: 8,
+              background: isDarkTheme ? '#0d1420' : '#ffffff',
+              color: 'var(--text)',
+              border: '1px solid var(--glass-border)',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+          >
+            {LANGUAGE_OPTIONS.map((opt) => (
+              <option key={opt.code} value={opt.code}>
+                {opt.label} ({opt.code.toUpperCase()})
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Show Splits Toggle */}
         <div style={rowStyle}>
-          <span style={{ fontSize: 14, fontWeight: 500 }}>{t.showSplits}</span>
+          <label htmlFor="settings-show-splits" style={{ fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>
+            {t.showSplits}
+          </label>
           <input
+            id="settings-show-splits"
             type="checkbox"
             checked={settings.showSplits}
+            aria-checked={settings.showSplits}
             onChange={(e) => onUpdateSettings({ ...settings, showSplits: e.target.checked })}
-            style={{ width: 18, height: 18, cursor: 'pointer', accentColor: '#00f0b5' }}
+            style={{ width: 20, height: 20, cursor: 'pointer', accentColor: '#00f0b5' }}
+          />
+        </div>
+
+        {/* Show Controls Widget Toggle */}
+        <div style={rowStyle}>
+          <label htmlFor="settings-show-controls" style={{ fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>
+            {t.showControls}
+          </label>
+          <input
+            id="settings-show-controls"
+            type="checkbox"
+            checked={settings.showControls}
+            aria-checked={settings.showControls}
+            onChange={(e) => onUpdateSettings({ ...settings, showControls: e.target.checked })}
+            style={{ width: 20, height: 20, cursor: 'pointer', accentColor: '#00f0b5' }}
           />
         </div>
 
         {/* Firefly Color */}
         <div style={{ ...rowStyle, flexDirection: 'column', alignItems: 'flex-start', gap: 10, borderBottom: 'none' }}>
           <span style={{ fontSize: 14, fontWeight: 500 }}>{t.fireflyColor}</span>
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ display: 'flex', gap: 10 }} role="group" aria-label={t.fireflyColor}>
             {GAME_CONFIG.player.colorPalette.map((col) => (
               <button
                 key={col}
                 onClick={() => onUpdateSettings({ ...settings, playerColor: col })}
+                aria-label={`Select firefly color ${col}`}
+                aria-pressed={settings.playerColor === col}
                 style={{
                   width: 32,
                   height: 32,

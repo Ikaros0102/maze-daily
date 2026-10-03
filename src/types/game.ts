@@ -96,11 +96,12 @@ export interface DailyStats {
 }
 
 export type ThemeMode = 'dark' | 'light';
-export type LanguageMode = 'en' | 'ru';
+export type LanguageMode = 'en' | 'ru' | 'es' | 'zh' | 'ja' | 'de' | 'tr' | 'pt';
 
 export interface GameSettings {
   theme: ThemeMode;
   lang: LanguageMode;
   playerColor: string;
   showSplits: boolean;
+  showControls: boolean;
 }

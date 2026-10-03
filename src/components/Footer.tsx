@@ -13,6 +13,7 @@ export const Footer: React.FC<FooterProps> = ({ lang, isDarkTheme }) => {
 
   return (
     <footer
+      role="contentinfo"
       style={{
         padding: '12px 20px',
         fontSize: '12px',
@@ -30,6 +31,7 @@ export const Footer: React.FC<FooterProps> = ({ lang, isDarkTheme }) => {
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <span
+          aria-hidden="true"
           style={{
             display: 'inline-block',
             width: 7,
@@ -48,6 +50,7 @@ export const Footer: React.FC<FooterProps> = ({ lang, isDarkTheme }) => {
           href="https://github.com"
           target="_blank"
           rel="noreferrer"
+          aria-label="GitHub repository (opens in a new tab)"
           style={{
             color: 'var(--text)',
             textDecoration: 'none',

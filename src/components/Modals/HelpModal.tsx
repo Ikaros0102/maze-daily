@@ -69,9 +69,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
             ⏱️ {t.splitsTitle}
           </div>
           <div style={{ fontSize: 13, lineHeight: 1.4, color: 'var(--muted)' }}>
-            {lang === 'ru'
-              ? 'Проходите контрольные точки (25%, 50%, 75%) строго по очереди и соревнуйтесь со своим лучшим временем!'
-              : 'Pass checkpoints (25%, 50%, 75%) strictly in order to compete against your personal best!'}
+            {t.splitsDesc}
           </div>
         </div>
       </div>

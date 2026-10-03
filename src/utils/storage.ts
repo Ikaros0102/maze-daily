@@ -13,6 +13,18 @@ export function getDefaultSettings(): GameSettings {
     const navLang = navigator.language.toLowerCase();
     if (navLang.startsWith('ru')) {
       lang = 'ru';
+    } else if (navLang.startsWith('es')) {
+      lang = 'es';
+    } else if (navLang.startsWith('zh')) {
+      lang = 'zh';
+    } else if (navLang.startsWith('ja')) {
+      lang = 'ja';
+    } else if (navLang.startsWith('de')) {
+      lang = 'de';
+    } else if (navLang.startsWith('tr')) {
+      lang = 'tr';
+    } else if (navLang.startsWith('pt')) {
+      lang = 'pt';
     }
   }
 
@@ -27,6 +39,7 @@ export function getDefaultSettings(): GameSettings {
     lang,
     playerColor: GAME_CONFIG.player.defaultColor,
     showSplits: true,
+    showControls: true,
   };
 }
 

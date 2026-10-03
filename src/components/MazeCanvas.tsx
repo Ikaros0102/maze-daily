@@ -100,6 +100,8 @@ export const MazeCanvas: React.FC<MazeCanvasProps> = ({
   return (
     <div
       ref={containerRef}
+      role="region"
+      aria-label="Maze Game Area"
       className="glass-panel"
       style={{
         position: 'relative',
@@ -117,6 +119,8 @@ export const MazeCanvas: React.FC<MazeCanvasProps> = ({
     >
       <canvas
         ref={canvasRef}
+        role="img"
+        aria-label="Interactive daily maze grid"
         style={{
           display: 'block',
           touchAction: 'none',

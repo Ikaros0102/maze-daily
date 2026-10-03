@@ -75,6 +75,8 @@ export const WinModal: React.FC<WinModalProps> = ({
 
         {/* Splits review */}
         <div
+          role="list"
+          aria-label={t.splitsTitle}
           style={{
             background: isDarkTheme ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.03)',
             border: '1px solid var(--glass-border)',

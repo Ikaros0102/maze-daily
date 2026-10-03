@@ -12,6 +12,7 @@ import { SettingsModal } from './components/Modals/SettingsModal';
 import { StatsModal } from './components/Modals/StatsModal';
 import { WinModal } from './components/Modals/WinModal';
 import { getDailyNumber, getLocalDailyDate } from './utils/date';
+import { formatTime, TRANSLATIONS } from './utils/i18n';
 import { initDailyLevel } from './utils/levelInit';
 import { loadDailyStats, loadSettings, saveRunRecord, saveSettings } from './utils/storage';
 import type { BreadcrumbPoint, GameSettings, RunRecord } from './types/game';
@@ -32,7 +33,9 @@ export function App() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window);
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || (window.innerWidth < 1024 && 'ontouchstart' in window));
+    };
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -85,6 +88,25 @@ export function App() {
     document.body.classList.toggle('light', !isDark);
   }, [isDark]);
 
+  useEffect(() => {
+    document.documentElement.lang = settings.lang;
+  }, [settings.lang]);
+
+  const latestAnnouncement = useMemo(() => {
+    if (lastWinRecord) {
+      const t = TRANSLATIONS[settings.lang];
+      return `${t.winTitle} ${formatTime(lastWinRecord.durationMs)}`;
+    }
+    const reached = checkpoints.filter((cp) => cp.reachedTimeMs !== null);
+    if (reached.length > 0) {
+      const last = reached[reached.length - 1];
+      const t = TRANSLATIONS[settings.lang];
+      const label = last.ratio === 0.25 ? t.split25 : last.ratio === 0.5 ? t.split50 : last.ratio === 0.75 ? t.split75 : t.splitFinish;
+      return `${label}: ${formatTime(last.reachedTimeMs)}`;
+    }
+    return '';
+  }, [lastWinRecord, checkpoints, settings.lang]);
+
   return (
     <div
       style={{
@@ -95,6 +117,10 @@ export function App() {
         color: 'var(--text)',
       }}
     >
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {latestAnnouncement}
+      </div>
+
       <Header
         dayNumber={dayNumber}
         elapsedMs={elapsedMs}
@@ -114,11 +140,21 @@ export function App() {
           flexDirection: isMobile ? 'column' : 'row',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 20,
+          gap: isMobile ? 10 : 20,
           padding: 14,
           position: 'relative',
         }}
       >
+        {isMobile && settings.showSplits && (
+          <SplitsPanel
+            checkpoints={checkpoints}
+            elapsedMs={elapsedMs}
+            lang={settings.lang}
+            isDarkTheme={isDark}
+            isMobile={true}
+          />
+        )}
+
         <div
           style={{
             position: 'relative',
@@ -127,7 +163,7 @@ export function App() {
             alignItems: 'center',
             width: '100%',
             height: '100%',
-            maxHeight: '85vh',
+            maxHeight: isMobile ? '70vh' : '85vh',
           }}
         >
           <MazeCanvas
@@ -140,22 +176,29 @@ export function App() {
             effect={effect}
             isDarkTheme={isDark}
           />
-          {settings.showSplits && isMobile && (
-            <SplitsPanel checkpoints={checkpoints} elapsedMs={elapsedMs} lang={settings.lang} isDarkTheme={isDark} isMobileOverlay />
-          )}
         </div>
 
         {!isMobile ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {settings.showSplits && (
-              <SplitsPanel checkpoints={checkpoints} elapsedMs={elapsedMs} lang={settings.lang} isDarkTheme={isDark} />
+              <SplitsPanel
+                checkpoints={checkpoints}
+                elapsedMs={elapsedMs}
+                lang={settings.lang}
+                isDarkTheme={isDark}
+                isMobile={false}
+              />
             )}
-            <ControlsWidget isMobile={false} isDarkTheme={isDark} lang={settings.lang} />
+            {settings.showControls && (
+              <ControlsWidget isMobile={false} isDarkTheme={isDark} lang={settings.lang} />
+            )}
           </div>
         ) : (
           <div style={{ width: '100%', marginTop: 6, display: 'flex', flexDirection: 'column', gap: 8 }}>
             <VirtualJoystick onMove={setJoystickVector} isDarkTheme={isDark} />
-            <ControlsWidget isMobile={true} isDarkTheme={isDark} lang={settings.lang} />
+            {settings.showControls && (
+              <ControlsWidget isMobile={true} isDarkTheme={isDark} lang={settings.lang} />
+            )}
           </div>
         )}
       </main>

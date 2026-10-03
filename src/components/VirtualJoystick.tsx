@@ -69,7 +69,8 @@ export const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ onMove, isDark
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
+      role="group"
+      aria-label="Virtual joystick for player navigation"
       style={{
         position: 'relative',
         width: radius * 2 + 20,

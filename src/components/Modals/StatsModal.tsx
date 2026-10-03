@@ -69,12 +69,14 @@ export const StatsModal: React.FC<StatsModalProps> = ({
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {pastDays.length > 1 && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)' }}>
-              {lang === 'ru' ? 'Выбор дня:' : 'Select Day:'}
-            </span>
+            <label htmlFor="stats-day-select" style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)' }}>
+              {t.selectDay}
+            </label>
             <select
+              id="stats-day-select"
               value={selectedDate}
               onChange={(e) => { setSelectedDate(e.target.value); setSelectedRunIdx(0); }}
+              aria-label={t.selectDay}
               style={{
                 padding: '4px 8px',
                 borderRadius: 6,
@@ -87,7 +89,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({
             >
               {pastDays.map((d) => (
                 <option key={d.date} value={d.date}>
-                  {d.date} {d.date === stats.date ? `(${lang === 'ru' ? 'Сегодня' : 'Today'})` : ''} - {d.totalRuns} {lang === 'ru' ? 'заб.' : 'runs'}
+                  {d.date} {d.date === stats.date ? `(${t.today})` : ''} - {d.totalRuns} {t.runsCount}
                 </option>
               ))}
             </select>

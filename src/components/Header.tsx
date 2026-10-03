@@ -41,6 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header
+      role="banner"
       className="glass-panel"
       style={{
         width: '100%',
@@ -70,6 +71,7 @@ export const Header: React.FC<HeaderProps> = ({
           </h1>
           <span
             className="glass-pill"
+            aria-label={`${t.dayLabel} ${dayNumber}`}
             style={{
               fontSize: 11,
               fontWeight: 700,
@@ -82,6 +84,8 @@ export const Header: React.FC<HeaderProps> = ({
           {effect.enabled && effectMeta && (
             <span
               className="glass-pill"
+              role="status"
+              aria-label={`${t.todayModifier}: ${effectName}. ${t.effects[effect.type]?.desc || ''}`}
               style={{
                 fontSize: 11,
                 display: 'flex',
@@ -93,7 +97,7 @@ export const Header: React.FC<HeaderProps> = ({
               }}
               title={t.effects[effect.type]?.desc}
             >
-              <span>{effectMeta.icon}</span>
+              <span aria-hidden="true">{effectMeta.icon}</span>
               <span style={{ fontWeight: 600 }}>{effectName}</span>
             </span>
           )}
@@ -101,6 +105,9 @@ export const Header: React.FC<HeaderProps> = ({
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div
+            role="timer"
+            aria-live="off"
+            aria-label={`${t.timer}: ${formatTime(elapsedMs)}`}
             style={{
               fontFamily: 'var(--font-mono)',
               fontSize: 20,
@@ -115,17 +122,41 @@ export const Header: React.FC<HeaderProps> = ({
             {formatTime(elapsedMs)}
           </div>
 
-          <button onClick={onRestart} className="glass-btn" style={btnStyle} title={t.restart}>
-            <RotateCcw size={15} />
+          <button
+            onClick={onRestart}
+            className="glass-btn"
+            style={btnStyle}
+            title={t.restart}
+            aria-label={t.restart}
+          >
+            <RotateCcw size={15} aria-hidden="true" />
           </button>
-          <button onClick={onOpenHelp} className="glass-btn" style={btnStyle} title={t.help}>
-            <HelpCircle size={15} />
+          <button
+            onClick={onOpenHelp}
+            className="glass-btn"
+            style={btnStyle}
+            title={t.help}
+            aria-label={t.help}
+          >
+            <HelpCircle size={15} aria-hidden="true" />
           </button>
-          <button onClick={onOpenStats} className="glass-btn" style={btnStyle} title={t.stats}>
-            <BarChart2 size={15} />
+          <button
+            onClick={onOpenStats}
+            className="glass-btn"
+            style={btnStyle}
+            title={t.stats}
+            aria-label={t.stats}
+          >
+            <BarChart2 size={15} aria-hidden="true" />
           </button>
-          <button onClick={onOpenSettings} className="glass-btn" style={btnStyle} title={t.settings}>
-            <Settings size={15} />
+          <button
+            onClick={onOpenSettings}
+            className="glass-btn"
+            style={btnStyle}
+            title={t.settings}
+            aria-label={t.settings}
+          >
+            <Settings size={15} aria-hidden="true" />
           </button>
         </div>
       </div>

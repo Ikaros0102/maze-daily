@@ -97,12 +97,10 @@ export function drawEffectObjects(
     }
   }
 
-  // Fake Exits (Decoys)
+  // Fake Exits (Decoys) - only revealed decoys rendered here on top of the maze
   if (effect.type === 'fake_exits' && effect.fakeExits) {
     for (const f of effect.fakeExits) {
-      if (!f.revealed) {
-        drawGoal(ctx, f, size, timeMs);
-      } else {
+      if (f.revealed) {
         const cx = (f.col + 0.5) * size;
         const cy = (f.row + 0.5) * size;
         ctx.fillStyle = 'rgba(244, 63, 94, 0.25)';

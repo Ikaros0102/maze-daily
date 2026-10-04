@@ -42,9 +42,16 @@ export function renderMazeScene(opts: RenderOptions): void {
   ctx.fillStyle = isDarkTheme ? '#080c14' : '#ffffff';
   ctx.fillRect(0, 0, width, height);
 
-  // 2. Start & Exit zones
+  // 2. Start & Exit zones (both true exit and unrevealed decoys rendered on the exact same layer before walls)
   drawHighlight(ctx, opts.start, cellSize, opts.timeMs);
   drawGoal(ctx, opts.exit, cellSize, opts.timeMs);
+  if (effect.type === 'fake_exits' && effect.fakeExits) {
+    for (const f of effect.fakeExits) {
+      if (!f.revealed) {
+        drawGoal(ctx, f, cellSize, opts.timeMs);
+      }
+    }
+  }
 
   // 3. Walls (crisp lines, no shadow blur inside maze)
   ctx.strokeStyle = isDarkTheme ? '#1c2638' : '#334155';

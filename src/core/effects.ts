@@ -1,4 +1,4 @@
-import { GAME_CONFIG, getEnabledEffects } from '../config/gameConfig';
+import { GAME_CONFIG, type EffectMeta } from '../config/gameConfig';
 import { getPassableNeighbors } from './pathfinder';
 import type {
   DailyEffectState,
@@ -76,15 +76,13 @@ function placeSafePortals(
 }
 
 export function generateDailyEffect(
-  effectRng: PRNG,
+  chosenMeta: EffectMeta,
   spawnRng: PRNG,
   grid: MazeCell[][],
   start: GridCoord,
   exit: GridCoord,
   shortestPath: GridCoord[]
 ): DailyEffectState {
-  const enabledEffects = getEnabledEffects();
-  const chosenMeta = effectRng.pick(enabledEffects);
   const rows = grid.length;
   const cols = grid[0].length;
 

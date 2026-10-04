@@ -37,7 +37,17 @@ src/
 
 ---
 
-## 2. Multi-Language Localization (`i18n.ts`)
+## 2. Deterministic Shuffle Bag for Effects (`effectBag.ts`)
+- Daily effects are randomized using a **Deterministic Shuffle Bag**:
+  - Time is partitioned into cycles of length $N$ (where $N$ is the number of enabled effects).
+  - Each enabled effect appears **exactly once** in every cycle (guaranteeing no droughts).
+  - Seam repeat prevention: When generating cycle $C$, if its first effect matches the last effect of cycle $C-1$, it is swapped with another element in cycle $C$.
+  - This guarantees that two consecutive days will **never** have the same effect.
+  - The sequence is 100% deterministic and synchronized across all clients worldwide.
+
+---
+
+## 3. Multi-Language Localization (`i18n.ts`)
 - Supported languages:
   - English (`en`)
   - Russian (`ru`)
@@ -55,7 +65,7 @@ src/
 
 ---
 
-## 3. Persistent User Settings (`storage.ts`)
+## 4. Persistent User Settings (`storage.ts`)
 - Player preferences are stored in `localStorage` under `maze_daily_settings_v1`:
   - `theme`: `'dark' | 'light'`
   - `lang`: `LanguageMode`
@@ -69,7 +79,7 @@ src/
 
 ---
 
-## 4. Mobile Layout & Canvas Viewport Conventions
+## 5. Mobile Layout & Canvas Viewport Conventions
 - Mobile breakpoint is `< 768px` (or touch-enabled tablets).
 - On mobile:
   - **Splits Panel**: Positioned in standard document flow **above** the maze canvas (`isMobile={true}` horizontal bar), NEVER as an absolute overlay overlapping maze cells.
@@ -79,7 +89,7 @@ src/
 
 ---
 
-## 5. Accessibility & Screen Reader (Blind Mode Foundation)
+## 6. Accessibility & Screen Reader (Blind Mode Foundation)
 - Semantic landmarks: `<header role="banner">`, `<main>`, `<footer role="contentinfo">`, `<section role="region">`.
 - Interactive elements: All icon-only buttons must have `aria-label` matching their localized title.
 - Dialogs: `ModalWrapper` uses `role="dialog"`, `aria-modal="true"`, and `aria-labelledby`.

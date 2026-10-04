@@ -1,4 +1,5 @@
 import { GAME_CONFIG } from '../config/gameConfig';
+import { getDailyEffectMetaForDate } from '../core/effectBag';
 import { generateDailyEffect } from '../core/effects';
 import { generateMazeGrid } from '../core/mazeGenerator';
 import { analyzeMazeNavigation } from '../core/pathfinder';
@@ -17,13 +18,14 @@ export function initDailyLevel(localDate: string): DailyLevel {
   const seeds = getSeedStreams(baseSeed);
 
   const mazeRng = createRNG(seeds.mazeSeed);
-  const effectRng = createRNG(seeds.effectSeed);
   const spawnRng = createRNG(seeds.spawnSeed);
 
   const grid = generateMazeGrid(GAME_CONFIG.maze.cols, GAME_CONFIG.maze.rows, mazeRng);
   const nav = analyzeMazeNavigation(grid);
+
+  const effectMeta = getDailyEffectMetaForDate(localDate);
   const effect = generateDailyEffect(
-    effectRng,
+    effectMeta,
     spawnRng,
     grid,
     nav.start,

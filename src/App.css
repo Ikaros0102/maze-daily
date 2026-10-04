@@ -159,3 +159,51 @@ body.light .active-split-glow {
   text-shadow: none;
   color: #0d9488 !important;
 }
+
+/* Game Layout Systems */
+
+.game-main-desktop {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 14px 20px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.game-main-desktop .desktop-canvas-anchor {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: min(82vh, calc(100vw - 520px), 920px);
+  height: min(82vh, calc(100vw - 520px), 920px);
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+}
+
+.game-main-desktop .desktop-sidebar-pinned {
+  position: absolute;
+  left: calc(100% + 20px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.game-main-vertical {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 14px;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+}

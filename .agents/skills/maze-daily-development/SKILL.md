@@ -79,13 +79,17 @@ src/
 
 ---
 
-## 5. Mobile Layout & Canvas Viewport Conventions
-- Mobile breakpoint is `< 768px` (or touch-enabled tablets).
-- On mobile:
-  - **Splits Panel**: Positioned in standard document flow **above** the maze canvas (`isMobile={true}` horizontal bar), NEVER as an absolute overlay overlapping maze cells.
-  - **Canvas Container**: Constrained to `maxHeight: '70vh'`, maintaining 1:1 square aspect ratio without overflowing.
-  - **Virtual Joystick**: Placed below the canvas with responsive sizing and touch coordinates clamping.
-  - **Controls Widget**: Placed below the joystick and hidden if `settings.showControls` is disabled.
+## 5. Viewport Layout Systems (Widescreen 16:9 / 21:9 & Portrait 9:16)
+- **Desktop Widescreen Mode** (`aspectRatio > 1.05 && width >= 850px`, e.g. 16:9, 16:10, 21:9):
+  - Uses CSS Grid with balanced 3-column architecture: `grid-template-columns: 1fr auto 1fr`.
+  - Column 1: Empty balancer (`1fr`).
+  - Column 2: Game canvas container (`.desktop-center`).
+  - Column 3: Sidebar (`1fr`, `.desktop-sidebar-col`), containing `SplitsPanel` and `ControlsWidget` aligned left (20px from canvas).
+  - **Dead-Center Guarantee**: Because columns 1 and 3 are both `1fr`, the canvas is always mathematically at the 50% horizontal center. Hiding or showing splits/controls never shifts the game by a single pixel.
+- **Vertical / Portrait Mode** (`aspectRatio <= 1.05 || width < 850px`, e.g. 9:16 monitors, phones, tablets):
+  - **Splits Panel**: Positioned in standard flow **above** the canvas as a compact horizontal bar (`isMobile={true}`), never overlapping canvas cells.
+  - **Canvas**: Centered in the viewport.
+  - **Controls / Joystick**: Placed below the canvas. Virtual joystick only renders for touch devices (`isTouchDevice`); non-touch vertical monitors display keyboard guide without joystick.
 
 ---
 

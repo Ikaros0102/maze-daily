@@ -30,15 +30,23 @@ export function App() {
   const [isWinOpen, setIsWinOpen] = useState(false);
   const [lastWinRecord, setLastWinRecord] = useState<RunRecord | null>(null);
   const [isNewPB, setIsNewPB] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isVerticalLayout, setIsVerticalLayout] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth / window.innerHeight <= 1.05 || window.innerWidth < 850;
+  });
+  const [isTouchDevice] = useState(() =>
+    typeof window !== 'undefined' && ('ontouchstart' in window || (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0))
+  );
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768 || (window.innerWidth < 1024 && 'ontouchstart' in window));
+    const handleResize = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const aspect = w / h;
+      setIsVerticalLayout(aspect <= 1.05 || w < 850);
     };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const { baseSeed, mazeData, initialEffect } = useMemo(
@@ -133,75 +141,103 @@ export function App() {
         onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
-      <main
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: isMobile ? 10 : 20,
-          padding: 14,
-          position: 'relative',
-        }}
-      >
-        {isMobile && settings.showSplits && (
-          <SplitsPanel
-            checkpoints={checkpoints}
-            elapsedMs={elapsedMs}
-            lang={settings.lang}
-            isDarkTheme={isDark}
-            isMobile={true}
-          />
-        )}
+      {isVerticalLayout ? (
+        <main className="game-main-vertical">
+          {settings.showSplits && (
+            <SplitsPanel
+              checkpoints={checkpoints}
+              elapsedMs={elapsedMs}
+              lang={settings.lang}
+              isDarkTheme={isDark}
+              isMobile={true}
+            />
+          )}
 
-        <div
-          style={{
-            position: 'relative',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100%',
-            height: '100%',
-            maxHeight: isMobile ? '70vh' : '85vh',
-          }}
-        >
-          <MazeCanvas
-            grid={mazeData.cells}
-            playerPos={playerPos}
-            playerColor={settings.playerColor}
-            start={mazeData.start}
-            exit={mazeData.exit}
-            checkpoints={checkpoints}
-            effect={effect}
-            isDarkTheme={isDark}
-          />
-        </div>
+          <div
+            style={{
+              position: 'relative',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '100%',
+              height: '100%',
+              maxHeight: isTouchDevice ? '68vh' : '75vh',
+              maxWidth: 'min(75vh, 92vw, 850px)',
+            }}
+          >
+            <MazeCanvas
+              grid={mazeData.cells}
+              playerPos={playerPos}
+              playerColor={settings.playerColor}
+              start={mazeData.start}
+              exit={mazeData.exit}
+              checkpoints={checkpoints}
+              effect={effect}
+              isDarkTheme={isDark}
+            />
+          </div>
 
-        {!isMobile ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {settings.showSplits && (
-              <SplitsPanel
-                checkpoints={checkpoints}
-                elapsedMs={elapsedMs}
-                lang={settings.lang}
+          <div
+            style={{
+              width: '100%',
+              maxWidth: 'min(75vh, 92vw, 850px)',
+              marginTop: 4,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+            }}
+          >
+            {isTouchDevice && (
+              <VirtualJoystick onMove={setJoystickVector} isDarkTheme={isDark} />
+            )}
+            {settings.showControls && (
+              <ControlsWidget
+                isMobile={isTouchDevice}
                 isDarkTheme={isDark}
-                isMobile={false}
+                lang={settings.lang}
               />
             )}
-            {settings.showControls && (
-              <ControlsWidget isMobile={false} isDarkTheme={isDark} lang={settings.lang} />
+          </div>
+        </main>
+      ) : (
+        <main className="game-main-desktop">
+          {/* Centered canvas anchor with exact 1:1 aspect ratio */}
+          <div className="desktop-canvas-anchor">
+            <MazeCanvas
+              grid={mazeData.cells}
+              playerPos={playerPos}
+              playerColor={settings.playerColor}
+              start={mazeData.start}
+              exit={mazeData.exit}
+              checkpoints={checkpoints}
+              effect={effect}
+              isDarkTheme={isDark}
+            />
+
+            {/* Sidebar pinned to the right of the canvas without affecting center alignment */}
+            {(settings.showSplits || settings.showControls) && (
+              <aside className="desktop-sidebar-pinned">
+                {settings.showSplits && (
+                  <SplitsPanel
+                    checkpoints={checkpoints}
+                    elapsedMs={elapsedMs}
+                    lang={settings.lang}
+                    isDarkTheme={isDark}
+                    isMobile={false}
+                  />
+                )}
+                {settings.showControls && (
+                  <ControlsWidget
+                    isMobile={false}
+                    isDarkTheme={isDark}
+                    lang={settings.lang}
+                  />
+                )}
+              </aside>
             )}
           </div>
-        ) : (
-          <div style={{ width: '100%', marginTop: 6, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <VirtualJoystick onMove={setJoystickVector} isDarkTheme={isDark} />
-            {settings.showControls && (
-              <ControlsWidget isMobile={true} isDarkTheme={isDark} lang={settings.lang} />
-            )}
-          </div>
-        )}
-      </main>
+        </main>
+      )}
 
       <Footer lang={settings.lang} isDarkTheme={isDark} />
 

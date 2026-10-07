@@ -40,6 +40,11 @@ export function getDefaultSettings(): GameSettings {
     playerColor: GAME_CONFIG.player.defaultColor,
     showSplits: true,
     showControls: true,
+    headTrackingEnabled: false,
+    audioNavEnabled: false,
+    audioNavVolume: 0.8,
+    audioNavMuted: false,
+    selectedAudioPack: 'classic',
   };
 }
 
@@ -51,7 +56,43 @@ export function loadSettings(): GameSettings {
     const raw = localStorage.getItem(GAME_CONFIG.storageKeys.settings);
     if (!raw) return defaults;
     const parsed = JSON.parse(raw);
-    return { ...defaults, ...parsed };
+    if (typeof parsed !== 'object' || parsed === null) return defaults;
+
+    const headTrackingEnabled =
+      typeof parsed.headTrackingEnabled === 'boolean'
+        ? parsed.headTrackingEnabled
+        : defaults.headTrackingEnabled;
+
+    const audioNavEnabled =
+      typeof parsed.audioNavEnabled === 'boolean'
+        ? parsed.audioNavEnabled
+        : defaults.audioNavEnabled;
+
+    const rawVolume =
+      typeof parsed.audioNavVolume === 'number' && !Number.isNaN(parsed.audioNavVolume)
+        ? parsed.audioNavVolume
+        : defaults.audioNavVolume;
+    const audioNavVolume = Math.max(0, Math.min(1, Math.round(rawVolume * 100) / 100));
+
+    const audioNavMuted =
+      typeof parsed.audioNavMuted === 'boolean'
+        ? parsed.audioNavMuted
+        : defaults.audioNavMuted;
+
+    const selectedAudioPack =
+      typeof parsed.selectedAudioPack === 'string' && parsed.selectedAudioPack.trim().length > 0
+        ? parsed.selectedAudioPack.trim()
+        : defaults.selectedAudioPack;
+
+    return {
+      ...defaults,
+      ...parsed,
+      headTrackingEnabled,
+      audioNavEnabled,
+      audioNavVolume,
+      audioNavMuted,
+      selectedAudioPack,
+    };
   } catch {
     return defaults;
   }
@@ -60,9 +101,16 @@ export function loadSettings(): GameSettings {
 export function saveSettings(settings: GameSettings): void {
   if (!isBrowser()) return;
   try {
+    const toSave: GameSettings = {
+      ...settings,
+      selectedAudioPack:
+        typeof settings.selectedAudioPack === 'string' && settings.selectedAudioPack.trim().length > 0
+          ? settings.selectedAudioPack.trim()
+          : 'classic',
+    };
     localStorage.setItem(
       GAME_CONFIG.storageKeys.settings,
-      JSON.stringify(settings)
+      JSON.stringify(toSave)
     );
   } catch {
     // Ignore storage write errors

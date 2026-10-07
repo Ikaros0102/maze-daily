@@ -42,7 +42,85 @@ export interface TranslationContent {
   historyTitle: string;
   replayTitle: string;
   privacyNote: string;
-  effects: Record<string, { name: string; desc: string }>;
+    effects: Record<string, { name: string; desc: string }>;
+
+  // ==========================================
+  // Modular Accessibility System (24 Keys)
+  // ==========================================
+
+  // 1. Accessibility Section & Toggles (8 keys)
+  accessibility: string;
+  headTracking: string;
+  headTrackingDesc: string;
+  headTrackingRecalibrate: string;
+  audioNav: string;
+  audioNavDesc: string;
+  audioNavVolume: string;
+  audioNavHotkeys: string;
+
+  // 2. Download Progress Modal (4 keys)
+  downloadingTitle: string;
+  downloadingProgress: string; // Template with {module} and {percent}
+  downloadComplete: string;
+  downloadFailed: string;
+
+  // 3. Calibration Modal (4 keys)
+  calibrationTitle: string;
+  calibrationPrompt: string;
+  calibrationCountdown: string; // Template with {seconds}
+  calibrationSuccess: string;
+
+  // 4. Camera Error Modal (4 keys)
+  cameraErrorTitle: string;
+  cameraDenied: string;
+  cameraNotFound: string;
+  cameraGenericError: string;
+
+  // 5. Audio Navigation ARIA Announcements (4 keys)
+  audioNavStatusMuted: string;
+  audioNavStatusUnmuted: string;
+  audioNavVolumeChanged: string; // Template with {percent}
+  audioFallbackNotice: string;
+
+  // 6. Additional Remediated Keys (7 keys)
+  calibrationTimeout: string;
+  calibrationRetry: string;
+  cancel: string;
+  muted: string;
+  unmute: string;
+  mute: string;
+  alternativeControls: string;
+
+  // ==========================================
+  // Dynamic Audio Packs (Sound Sets) Keys
+  // ==========================================
+  soundPack: string;
+  soundPackDesc: string;
+  soundPackClassic: string;
+  soundPackOrganic: string;
+  soundPackSynth: string;
+  soundPackClockwork: string;
+  audioPackClassic: string;
+  audioPackOrganic: string;
+  audioPackSynth: string;
+  audioPackClockwork: string;
+  audioPackDownloading: string;
+  audioPackDownloadProgress: string; // Template with {pack} and {percent}
+  audioPackDownloadComplete: string;
+  audioPackDownloadFailed: string;
+
+  // Dotted-path compatibility aliases
+  'settings.soundPack': string;
+  'settings.soundPackDesc': string;
+  'settings.soundPackClassic': string;
+  'settings.soundPackOrganic': string;
+  'settings.soundPackSynth': string;
+  'settings.soundPackClockwork': string;
+  'audioPack.downloading': string;
+  'audioPack.downloadProgress': string;
+  'audioPack.downloadComplete': string;
+  'audioPack.downloadFailed': string;
+  keyCollected: string;
 }
 
 export const LANGUAGE_OPTIONS: { code: LanguageMode; label: string }[] = [
@@ -110,6 +188,75 @@ export const TRANSLATIONS: Record<LanguageMode, TranslationContent> = {
       inversion: { name: 'Inversion', desc: 'Controls are reversed!' },
       switches_and_barriers: { name: 'Switches', desc: 'Toggle barrier gates.' },
     },
+    // Accessibility Section & Toggles
+    accessibility: 'Accessibility',
+    headTracking: 'Head Tracking',
+    headTrackingDesc: 'Control player movement using subtle head tilt via webcam.',
+    headTrackingRecalibrate: 'Recalibrate',
+    audioNav: 'Audio Navigation',
+    audioNavDesc: 'Stereo exit beacon and dynamic multi-stem audio for blind play.',
+    audioNavVolume: 'Audio Navigation Volume',
+    audioNavHotkeys: 'Volume hotkeys: [ / ] or - / + (5% step), M to mute.',
+
+    // Download Progress Modal
+    downloadingTitle: 'Downloading Accessibility Assets',
+    downloadingProgress: 'Downloading {module}: {percent}%',
+    downloadComplete: 'Download complete!',
+    downloadFailed: 'Failed to download module assets. Please check your internet connection.',
+
+    // Calibration Modal
+    calibrationTitle: 'Head Tracking Calibration',
+    calibrationPrompt: 'Look straight ahead at the center of the screen and hold still.',
+    calibrationCountdown: 'Calibrating in {seconds}s...',
+    calibrationSuccess: 'Calibration successful! Head tracking active.',
+
+    // Camera Error Modal
+    cameraErrorTitle: 'Camera Access Required',
+    cameraDenied: 'Camera access was denied. Please allow camera permissions in your browser to enable Head Tracking.',
+    cameraNotFound: 'No camera was detected on this device. Please connect a webcam or use keyboard/touch controls.',
+    cameraGenericError: 'Unable to start camera stream. Please check your camera settings and try again.',
+
+    // Audio Navigation ARIA Announcements
+    audioNavStatusMuted: 'Audio navigation muted',
+    audioNavStatusUnmuted: 'Audio navigation unmuted',
+    audioNavVolumeChanged: 'Volume {percent}%',
+    audioFallbackNotice: 'Audio stems unavailable, using synthesized harmonic fallback.',
+
+    // Additional Remediated Keys
+    calibrationTimeout: 'Calibration timed out. Lighting may be insufficient or your face is not visible. Please center your face and try again.',
+    calibrationRetry: 'Retry',
+    cancel: 'Cancel',
+    muted: 'Muted',
+    unmute: 'Unmute audio navigation',
+    mute: 'Mute audio navigation',
+    alternativeControls: 'Alternative Controls Available',
+
+    // Dynamic Audio Packs (Sound Sets)
+    soundPack: 'Sound Pack',
+    soundPackDesc: 'Select dynamic multi-stem audio theme for navigation.',
+    soundPackClassic: 'Classic (Orchestral)',
+    soundPackOrganic: 'Organic (Acoustic)',
+    soundPackSynth: 'Synthesizer (Electronic)',
+    soundPackClockwork: 'Clockwork (Mechanical)',
+    audioPackClassic: 'Classic (Orchestral)',
+    audioPackOrganic: 'Organic (Acoustic)',
+    audioPackSynth: 'Synthesizer (Electronic)',
+    audioPackClockwork: 'Clockwork (Mechanical)',
+    audioPackDownloading: 'Downloading Sound Pack...',
+    audioPackDownloadProgress: 'Downloading {pack}: {percent}%',
+    audioPackDownloadComplete: 'Download complete!',
+    audioPackDownloadFailed: 'Failed to download sound pack. Please check your internet connection.',
+    'settings.soundPack': 'Sound Pack',
+    'settings.soundPackDesc': 'Select dynamic multi-stem audio theme for navigation.',
+    'settings.soundPackClassic': 'Classic (Orchestral)',
+    'settings.soundPackOrganic': 'Organic (Acoustic)',
+    'settings.soundPackSynth': 'Synthesizer (Electronic)',
+    'settings.soundPackClockwork': 'Clockwork (Mechanical)',
+    'audioPack.downloading': 'Downloading Sound Pack...',
+    'audioPack.downloadProgress': 'Downloading {pack}: {percent}%',
+    'audioPack.downloadComplete': 'Download complete!',
+    'audioPack.downloadFailed': 'Failed to download sound pack. Please check your internet connection.',
+    keyCollected: 'Key collected! The gate is open, head to the exit.',
   },
   ru: {
     appTitle: 'Maze Daily',
@@ -164,6 +311,75 @@ export const TRANSLATIONS: Record<LanguageMode, TranslationContent> = {
       inversion: { name: 'Инверсия', desc: 'Направления управления перевернуты!' },
       switches_and_barriers: { name: 'Переключатели', desc: 'Переключают барьеры.' },
     },
+    // Accessibility Section & Toggles
+    accessibility: 'Специальные возможности',
+    headTracking: 'Управление головой',
+    headTrackingDesc: 'Управляйте движением светлячка легкими наклонами головы перед веб-камерой.',
+    headTrackingRecalibrate: 'Перекалибровать',
+    audioNav: 'Аудио-навигация',
+    audioNavDesc: 'Стерео-маяк к выходу и динамические музыкальные дорожки для незрячих игроков.',
+    audioNavVolume: 'Громкость аудио-навигации',
+    audioNavHotkeys: 'Горячие клавиши громкости: [ / ] или - / + (шаг 5%), M — выкл. звук.',
+
+    // Download Progress Modal
+    downloadingTitle: 'Загрузка модулей доступности',
+    downloadingProgress: 'Загрузка {module}: {percent}%',
+    downloadComplete: 'Загрузка завершена!',
+    downloadFailed: 'Не удалось загрузить файлы модуля. Проверьте интернет-соединение.',
+
+    // Calibration Modal
+    calibrationTitle: 'Калибровка отслеживания головы',
+    calibrationPrompt: 'Смотрите прямо в центр экрана и сохраняйте неподвижность.',
+    calibrationCountdown: 'Калибровка через {seconds} с...',
+    calibrationSuccess: 'Калибровка завершена! Управление головой активно.',
+
+    // Camera Error Modal
+    cameraErrorTitle: 'Ошибка доступа к камере',
+    cameraDenied: 'Доступ к веб-камере был отклонен. Разрешите доступ к камере в настройках браузера для использования управления головой.',
+    cameraNotFound: 'Веб-камера на устройстве не обнаружена. Подключите камеру или используйте управление клавиатурой/джойстиком.',
+    cameraGenericError: 'Не удалось запустить видеопоток с камеры. Проверьте настройки камеры и повторите попытку.',
+
+    // Audio Navigation ARIA Announcements
+    audioNavStatusMuted: 'Звук аудио-навигации выключен',
+    audioNavStatusUnmuted: 'Звук аудио-навигации включен',
+    audioNavVolumeChanged: 'Громкость {percent}%',
+    audioFallbackNotice: 'Музыкальные дорожки недоступны, используется синтезаторная гармония.',
+
+    // Additional Remediated Keys
+    calibrationTimeout: 'Время калибровки истекло. Освещение может быть недостаточным или лицо не видно. Пожалуйста, расположите лицо по центру и попробуйте снова.',
+    calibrationRetry: 'Повторить',
+    cancel: 'Отмена',
+    muted: 'Без звука',
+    unmute: 'Включить звук аудио-навигации',
+    mute: 'Отключить звук аудио-навигации',
+    alternativeControls: 'Доступны альтернативные способы управления',
+
+    // Dynamic Audio Packs (Sound Sets)
+    soundPack: 'Звуковой набор',
+    soundPackDesc: 'Выберите динамическую аудио-тему для навигации.',
+    soundPackClassic: 'Классика (Оркестр)',
+    soundPackOrganic: 'Органика (Акустика)',
+    soundPackSynth: 'Синтезатор (Электроника)',
+    soundPackClockwork: 'Механизм (Часовой)',
+    audioPackClassic: 'Классика (Оркестр)',
+    audioPackOrganic: 'Органика (Акустика)',
+    audioPackSynth: 'Синтезатор (Электроника)',
+    audioPackClockwork: 'Механизм (Часовой)',
+    audioPackDownloading: 'Загрузка звукового набора...',
+    audioPackDownloadProgress: 'Загрузка {pack}: {percent}%',
+    audioPackDownloadComplete: 'Загрузка завершена!',
+    audioPackDownloadFailed: 'Не удалось загрузить звуковой набор. Проверьте интернет-соединение.',
+    'settings.soundPack': 'Звуковой набор',
+    'settings.soundPackDesc': 'Выберите динамическую аудио-тему для навигации.',
+    'settings.soundPackClassic': 'Классика (Оркестр)',
+    'settings.soundPackOrganic': 'Органика (Акустика)',
+    'settings.soundPackSynth': 'Синтезатор (Электроника)',
+    'settings.soundPackClockwork': 'Механизм (Часовой)',
+    'audioPack.downloading': 'Загрузка звукового набора...',
+    'audioPack.downloadProgress': 'Загрузка {pack}: {percent}%',
+    'audioPack.downloadComplete': 'Загрузка завершена!',
+    'audioPack.downloadFailed': 'Не удалось загрузить звуковой набор. Проверьте интернет-соединение.',
+    keyCollected: 'Ключ получен! Ворота открыты, идите к выходу.',
   },
   es: {
     appTitle: 'Maze Daily',
@@ -218,6 +434,75 @@ export const TRANSLATIONS: Record<LanguageMode, TranslationContent> = {
       inversion: { name: 'Inversión', desc: '¡Los controles están invertidos!' },
       switches_and_barriers: { name: 'Interruptores', desc: 'Activa y desactiva las barreras.' },
     },
+    // Accessibility Section & Toggles
+    accessibility: 'Accesibilidad',
+    headTracking: 'Seguimiento de cabeza',
+    headTrackingDesc: 'Controla el movimiento de la luciérnaga inclinando suavemente la cabeza ante la cámara.',
+    headTrackingRecalibrate: 'Recalibrar',
+    audioNav: 'Navegación por audio',
+    audioNavDesc: 'Baliza sonora estéreo y capas musicales dinámicas para juego accesible.',
+    audioNavVolume: 'Volumen de navegación por audio',
+    audioNavHotkeys: 'Teclas de volumen: [ / ] o - / + (paso 5%), M para silenciar.',
+
+    // Download Progress Modal
+    downloadingTitle: 'Descargando recursos de accesibilidad',
+    downloadingProgress: 'Descargando {module}: {percent}%',
+    downloadComplete: '¡Descarga completada!',
+    downloadFailed: 'No se pudieron descargar los recursos. Revisa tu conexión a internet.',
+
+    // Calibration Modal
+    calibrationTitle: 'Calibración de seguimiento de cabeza',
+    calibrationPrompt: 'Mira directamente al centro de la pantalla y mantente quieto.',
+    calibrationCountdown: 'Calibrando en {seconds} s...',
+    calibrationSuccess: '¡Calibración exitosa! Seguimiento de cabeza activado.',
+
+    // Camera Error Modal
+    cameraErrorTitle: 'Acceso a la cámara requerido',
+    cameraDenied: 'Se denegó el acceso a la cámara. Concede permisos de cámara en tu navegador para activar el seguimiento de cabeza.',
+    cameraNotFound: 'No se detectó ninguna cámara en este dispositivo. Conecta una webcam o utiliza el teclado/joystick.',
+    cameraGenericError: 'No se pudo iniciar el vídeo de la cámara. Revisa la configuración de tu cámara e inténtalo de nuevo.',
+
+    // Audio Navigation ARIA Announcements
+    audioNavStatusMuted: 'Navegación por audio silenciada',
+    audioNavStatusUnmuted: 'Navegación por audio activada',
+    audioNavVolumeChanged: 'Volumen {percent}%',
+    audioFallbackNotice: 'Pistas de audio no disponibles, usando síntesis armónica de respaldo.',
+
+    // Additional Remediated Keys
+    calibrationTimeout: 'Tiempo de calibración agotado. Es posible que la iluminación sea insuficiente o que no se detecte tu rostro. Céntralo e inténtalo de nuevo.',
+    calibrationRetry: 'Reintentar',
+    cancel: 'Cancelar',
+    muted: 'Silenciado',
+    unmute: 'Activar sonido de navegación de audio',
+    mute: 'Silenciar navegación de audio',
+    alternativeControls: 'Controles alternativos disponibles',
+
+    // Dynamic Audio Packs (Sound Sets)
+    soundPack: 'Paquete de sonido',
+    soundPackDesc: 'Selecciona el tema de audio dinámico para la navegación.',
+    soundPackClassic: 'Clásico (Orquestal)',
+    soundPackOrganic: 'Orgánico (Acústico)',
+    soundPackSynth: 'Sintetizador (Electrónico)',
+    soundPackClockwork: 'Mecanismo (Mecánico)',
+    audioPackClassic: 'Clásico (Orquestal)',
+    audioPackOrganic: 'Orgánico (Acústico)',
+    audioPackSynth: 'Sintetizador (Electrónico)',
+    audioPackClockwork: 'Mecanismo (Mecánico)',
+    audioPackDownloading: 'Descargando paquete de sonido...',
+    audioPackDownloadProgress: 'Descargando {pack}: {percent}%',
+    audioPackDownloadComplete: '¡Descarga completada!',
+    audioPackDownloadFailed: 'No se pudo descargar el paquete de sonido. Revisa tu conexión a internet.',
+    'settings.soundPack': 'Paquete de sonido',
+    'settings.soundPackDesc': 'Selecciona el tema de audio dinámico para la navegación.',
+    'settings.soundPackClassic': 'Clásico (Orquestal)',
+    'settings.soundPackOrganic': 'Orgánico (Acústico)',
+    'settings.soundPackSynth': 'Sintetizador (Electrónico)',
+    'settings.soundPackClockwork': 'Mecanismo (Mecánico)',
+    'audioPack.downloading': 'Descargando paquete de sonido...',
+    'audioPack.downloadProgress': 'Descargando {pack}: {percent}%',
+    'audioPack.downloadComplete': '¡Descarga completada!',
+    'audioPack.downloadFailed': 'No se pudo descargar el paquete de sonido. Revisa tu conexión a internet.',
+    keyCollected: '¡Llave recogida! La puerta está abierta, dirígete a la salida.',
   },
   zh: {
     appTitle: 'Maze Daily',
@@ -272,6 +557,75 @@ export const TRANSLATIONS: Record<LanguageMode, TranslationContent> = {
       inversion: { name: '反转控制', desc: '移动方向完全倒转！' },
       switches_and_barriers: { name: '机关开关', desc: '切换通行的阻挡栏杆。' },
     },
+    // Accessibility Section & Toggles
+    accessibility: '无障碍功能',
+    headTracking: '头部追踪',
+    headTrackingDesc: '通过摄像头捕捉轻微头部倾斜来控制萤火虫移动。',
+    headTrackingRecalibrate: '重新校准',
+    audioNav: '音频导航',
+    audioNavDesc: '立体声出口导引与动态多轨音频，支持视障与盲人玩家畅玩。',
+    audioNavVolume: '音频导航音量',
+    audioNavHotkeys: '音量快捷键：[ / ] 或 - / +（步长 5%），M 键静音。',
+
+    // Download Progress Modal
+    downloadingTitle: '正在下载无障碍资源',
+    downloadingProgress: '正在下载 {module}：{percent}%',
+    downloadComplete: '下载完成！',
+    downloadFailed: '模块资源下载失败，请检查网络连接。',
+
+    // Calibration Modal
+    calibrationTitle: '头部追踪校准',
+    calibrationPrompt: '请直视屏幕中心并保持不动。',
+    calibrationCountdown: '将在 {seconds} 秒后完成校准...',
+    calibrationSuccess: '校准成功！头部追踪已启用。',
+
+    // Camera Error Modal
+    cameraErrorTitle: '无法访问摄像头',
+    cameraDenied: '摄像头权限已被拒绝。请在浏览器设置中允许摄像头权限以启用头部追踪。',
+    cameraNotFound: '未检测到可用摄像头。请连接摄像头或使用键盘/触控操作。',
+    cameraGenericError: '无法启动摄像头画面，请检查设备设置后重试。',
+
+    // Audio Navigation ARIA Announcements
+    audioNavStatusMuted: '音频导航已静音',
+    audioNavStatusUnmuted: '音频导航已取消静音',
+    audioNavVolumeChanged: '音量 {percent}%',
+    audioFallbackNotice: '多轨音频资源不可用，已自动切换为合成谐波音效。',
+
+    // Additional Remediated Keys
+    calibrationTimeout: '校准超时。可能是光线不足或未能检测到面部。请将面部对准中心并重试。',
+    calibrationRetry: '重试',
+    cancel: '取消',
+    muted: '静音',
+    unmute: '取消静音音频导航',
+    mute: '静音音频导航',
+    alternativeControls: '可用替代控制方式',
+
+    // Dynamic Audio Packs (Sound Sets)
+    soundPack: '音效包',
+    soundPackDesc: '选择用于导航的动态多轨音频主题。',
+    soundPackClassic: '经典（管弦乐）',
+    soundPackOrganic: '原声（原声乐器）',
+    soundPackSynth: '合成器（电子乐）',
+    soundPackClockwork: '发条（机械音）',
+    audioPackClassic: '经典（管弦乐）',
+    audioPackOrganic: '原声（原声乐器）',
+    audioPackSynth: '合成器（电子乐）',
+    audioPackClockwork: '发条（机械音）',
+    audioPackDownloading: '正在下载音效包...',
+    audioPackDownloadProgress: '正在下载 {pack}：{percent}%',
+    audioPackDownloadComplete: '下载完成！',
+    audioPackDownloadFailed: '音效包下载失败，请检查网络连接。',
+    'settings.soundPack': '音效包',
+    'settings.soundPackDesc': '选择用于导航的动态多轨音频主题。',
+    'settings.soundPackClassic': '经典（管弦乐）',
+    'settings.soundPackOrganic': '原声（原声乐器）',
+    'settings.soundPackSynth': '合成器（电子乐）',
+    'settings.soundPackClockwork': '发条（机械音）',
+    'audioPack.downloading': '正在下载音效包...',
+    'audioPack.downloadProgress': '正在下载 {pack}：{percent}%',
+    'audioPack.downloadComplete': '下载完成！',
+    'audioPack.downloadFailed': '音效包下载失败，请检查网络连接。',
+    keyCollected: '已拾取钥匙！大门已开启，请前往出口。',
   },
   ja: {
     appTitle: 'Maze Daily',
@@ -326,6 +680,75 @@ export const TRANSLATIONS: Record<LanguageMode, TranslationContent> = {
       inversion: { name: '反転', desc: '操作方向が反転しています！' },
       switches_and_barriers: { name: 'スイッチ', desc: 'バリアを切り替えます。' },
     },
+    // Accessibility Section & Toggles
+    accessibility: 'アクセシビリティ',
+    headTracking: 'ヘッドトラッキング',
+    headTrackingDesc: 'Webカメラで頭の傾きを検知し、ホタルを操作します。',
+    headTrackingRecalibrate: '再キャリブレーション',
+    audioNav: 'オーディオナビゲーション',
+    audioNavDesc: 'ステレオ出口ビーコンと動的マルチステム音響による視覚障害者対応モード。',
+    audioNavVolume: 'オーディオナビ音量',
+    audioNavHotkeys: '音量ショートカット: [ / ] または - / +（5%刻み）、Mで消音。',
+
+    // Download Progress Modal
+    downloadingTitle: 'アクセシビリティアセットをダウンロード中',
+    downloadingProgress: '{module} をダウンロード中: {percent}%',
+    downloadComplete: 'ダウンロード完了！',
+    downloadFailed: 'モジュールアセットのダウンロードに失敗しました。接続環境をご確認ください。',
+
+    // Calibration Modal
+    calibrationTitle: 'ヘッドトラッキングのキャリブレーション',
+    calibrationPrompt: '画面の中央をまっすぐ見つめ、静止してください。',
+    calibrationCountdown: '残り {seconds} 秒で測定...',
+    calibrationSuccess: 'キャリブレーション完了！ヘッドトラッキングが有効化されました。',
+
+    // Camera Error Modal
+    cameraErrorTitle: 'カメラへのアクセスエラー',
+    cameraDenied: 'カメラへのアクセスが拒否されました。ブラウザの設定でカメラを許可してください。',
+    cameraNotFound: 'カメラが検出されませんでした。Webカメラを接続するか、キーボード/タッチ操作をご利用ください。',
+    cameraGenericError: 'カメラ映像を開始できませんでした。カメラの設定を確認して再試行してください。',
+
+    // Audio Navigation ARIA Announcements
+    audioNavStatusMuted: 'オーディオナビ消音',
+    audioNavStatusUnmuted: 'オーディオナビ消音解除',
+    audioNavVolumeChanged: '音量 {percent}%',
+    audioFallbackNotice: '音源ファイルを読み込めないため、合成サイン波ハーモニーで代行します。',
+
+    // Additional Remediated Keys
+    calibrationTimeout: 'キャリブレーションがタイムアウトしました。照明が不足しているか、顔が認識されていません。顔を中央に合わせて再試行してください。',
+    calibrationRetry: '再試行',
+    cancel: 'キャンセル',
+    muted: 'ミュート中',
+    unmute: '音声ナビゲーションのミュートを解除',
+    mute: '音声ナビゲーションをミュート',
+    alternativeControls: '代替の操作方法を利用可能',
+
+    // Dynamic Audio Packs (Sound Sets)
+    soundPack: 'サウンドパック',
+    soundPackDesc: 'ナビゲーション用の動的マルチステム音響テーマを選択します。',
+    soundPackClassic: 'クラシック（オーケストラ）',
+    soundPackOrganic: 'オーガニック（アコースティック）',
+    soundPackSynth: 'シンセサイザー（エレクトロニック）',
+    soundPackClockwork: 'クロックワーク（機械音）',
+    audioPackClassic: 'クラシック（オーケストラ）',
+    audioPackOrganic: 'オーガニック（アコースティック）',
+    audioPackSynth: 'シンセサイザー（エレクトロニック）',
+    audioPackClockwork: 'クロックワーク（機械音）',
+    audioPackDownloading: 'サウンドパックをダウンロード中...',
+    audioPackDownloadProgress: '{pack} をダウンロード中: {percent}%',
+    audioPackDownloadComplete: 'ダウンロード完了！',
+    audioPackDownloadFailed: 'サウンドパックのダウンロードに失敗しました。接続環境をご確認ください。',
+    'settings.soundPack': 'サウンドパック',
+    'settings.soundPackDesc': 'ナビゲーション用の動的マルチステム音響テーマを選択します。',
+    'settings.soundPackClassic': 'クラシック（オーケストラ）',
+    'settings.soundPackOrganic': 'オーガニック（アコースティック）',
+    'settings.soundPackSynth': 'シンセサイザー（エレクトロニック）',
+    'settings.soundPackClockwork': 'クロックワーク（機械音）',
+    'audioPack.downloading': 'サウンドパックをダウンロード中...',
+    'audioPack.downloadProgress': '{pack} をダウンロード中: {percent}%',
+    'audioPack.downloadComplete': 'ダウンロード完了！',
+    'audioPack.downloadFailed': 'サウンドパックのダウンロードに失敗しました。接続環境をご確認ください。',
+    keyCollected: '鍵を入手しました！ゲートが開きました、出口へ向かってください。',
   },
   de: {
     appTitle: 'Maze Daily',
@@ -380,6 +803,75 @@ export const TRANSLATIONS: Record<LanguageMode, TranslationContent> = {
       inversion: { name: 'Inversion', desc: 'Steuerung ist spiegelverkehrt!' },
       switches_and_barriers: { name: 'Schalter', desc: 'Schaltet Barrieren um.' },
     },
+    // Accessibility Section & Toggles
+    accessibility: 'Barrierefreiheit',
+    headTracking: 'Kopfbewegungssteuerung',
+    headTrackingDesc: 'Steuere das Glühwürmchen durch feine Kopfbewegungen über die Webcam.',
+    headTrackingRecalibrate: 'Neu kalibrieren',
+    audioNav: 'Audionavigation',
+    audioNavDesc: 'Stereo-Zielsignal und dynamische Mehrspur-Musik für barrierefreies Spielen.',
+    audioNavVolume: 'Audionavigations-Lautstärke',
+    audioNavHotkeys: 'Lautstärke-Hotkeys: [ / ] oder - / + (5%-Schritte), M für Stummschaltung.',
+
+    // Download Progress Modal
+    downloadingTitle: 'Barrierefreiheits-Ressourcen werden heruntergeladen',
+    downloadingProgress: '{module} wird heruntergeladen: {percent}%',
+    downloadComplete: 'Download abgeschlossen!',
+    downloadFailed: 'Fehler beim Herunterladen der Moduldateien. Bitte Internetverbindung prüfen.',
+
+    // Calibration Modal
+    calibrationTitle: 'Kopfbewegung-Kalibrierung',
+    calibrationPrompt: 'Blicke geradeaus auf die Bildschirmmitte und halte still.',
+    calibrationCountdown: 'Kalibrierung in {seconds} s...',
+    calibrationSuccess: 'Kalibrierung erfolgreich! Kopfbewegungssteuerung aktiv.',
+
+    // Camera Error Modal
+    cameraErrorTitle: 'Kamerazugriff erforderlich',
+    cameraDenied: 'Der Kamerazugriff wurde verweigert. Bitte erlaube den Kamerazugriff im Browser, um die Kopfbewegung zu aktivieren.',
+    cameraNotFound: 'Es wurde keine Kamera erkannt. Bitte Webcam anschließen oder Tastatur/Touch nutzen.',
+    cameraGenericError: 'Videostream der Kamera konnte nicht gestartet werden. Bitte Einstellungen prüfen und erneut versuchen.',
+
+    // Audio Navigation ARIA Announcements
+    audioNavStatusMuted: 'Audionavigation stummgeschaltet',
+    audioNavStatusUnmuted: 'Audionavigation Stummschaltung aufgehoben',
+    audioNavVolumeChanged: 'Lautstärke {percent}%',
+    audioFallbackNotice: 'Audiospuren nicht verfügbar, harmonische Synthese-Alternative aktiv.',
+
+    // Additional Remediated Keys
+    calibrationTimeout: 'Kalibrierung abgelaufen. Möglicherweise ist das Licht unzureichend oder dein Gesicht ist nicht sichtbar. Bitte zentriere dein Gesicht und versuche es erneut.',
+    calibrationRetry: 'Wiederholen',
+    cancel: 'Abbrechen',
+    muted: 'Stummgeschaltet',
+    unmute: 'Audionavigation laut schalten',
+    mute: 'Audionavigation stummschalten',
+    alternativeControls: 'Alternative Steuerung verfügbar',
+
+    // Dynamic Audio Packs (Sound Sets)
+    soundPack: 'Sound-Paket',
+    soundPackDesc: 'Wähle ein dynamisches Mehrspur-Audiothema für die Navigation.',
+    soundPackClassic: 'Klassisch (Orchester)',
+    soundPackOrganic: 'Organisch (Akustisch)',
+    soundPackSynth: 'Synthesizer (Elektronisch)',
+    soundPackClockwork: 'Uhrwerk (Mechanisch)',
+    audioPackClassic: 'Klassisch (Orchester)',
+    audioPackOrganic: 'Organisch (Akustisch)',
+    audioPackSynth: 'Synthesizer (Elektronisch)',
+    audioPackClockwork: 'Uhrwerk (Mechanisch)',
+    audioPackDownloading: 'Sound-Paket wird heruntergeladen...',
+    audioPackDownloadProgress: '{pack} wird heruntergeladen: {percent}%',
+    audioPackDownloadComplete: 'Download abgeschlossen!',
+    audioPackDownloadFailed: 'Fehler beim Herunterladen des Sound-Pakets. Bitte Internetverbindung prüfen.',
+    'settings.soundPack': 'Sound-Paket',
+    'settings.soundPackDesc': 'Wähle ein dynamisches Mehrspur-Audiothema für die Navigation.',
+    'settings.soundPackClassic': 'Klassisch (Orchester)',
+    'settings.soundPackOrganic': 'Organisch (Akustisch)',
+    'settings.soundPackSynth': 'Synthesizer (Elektronisch)',
+    'settings.soundPackClockwork': 'Uhrwerk (Mechanisch)',
+    'audioPack.downloading': 'Sound-Paket wird heruntergeladen...',
+    'audioPack.downloadProgress': '{pack} wird heruntergeladen: {percent}%',
+    'audioPack.downloadComplete': 'Download abgeschlossen!',
+    'audioPack.downloadFailed': 'Fehler beim Herunterladen des Sound-Pakets. Bitte Internetverbindung prüfen.',
+    keyCollected: 'Schlüssel gesammelt! Das Tor ist offen, gehe zum Ausgang.',
   },
   tr: {
     appTitle: 'Maze Daily',
@@ -434,6 +926,75 @@ export const TRANSLATIONS: Record<LanguageMode, TranslationContent> = {
       inversion: { name: 'Ters Kontrol', desc: 'Yön kontrolleri ters çevrilmiştir!' },
       switches_and_barriers: { name: 'Şalterler', desc: 'Bariyer kapılarını değiştirir.' },
     },
+    // Accessibility Section & Toggles
+    accessibility: 'Erişilebilirlik',
+    headTracking: 'Baş Takibi',
+    headTrackingDesc: 'Web kamerasıyla hafif baş hareketlerinizi algılayarak ateşböceğini kontrol edin.',
+    headTrackingRecalibrate: 'Yeniden Kalibre Et',
+    audioNav: 'Sesli Navigasyon',
+    audioNavDesc: 'Görme engelli oyuncular için stereo çıkış sinyali ve dinamik çoklu müzik kanalları.',
+    audioNavVolume: 'Sesli Navigasyon Ses Düzeyi',
+    audioNavHotkeys: 'Ses kısayolları: [ / ] veya - / + (%5 adım), M ile sessize al.',
+
+    // Download Progress Modal
+    downloadingTitle: 'Erişilebilirlik Dosyaları İndiriliyor',
+    downloadingProgress: '{module} indiriliyor: %{percent}',
+    downloadComplete: 'İndirme tamamlandı!',
+    downloadFailed: 'Modül dosyaları indirilemedi. Lütfen internet bağlantınızı kontrol edin.',
+
+    // Calibration Modal
+    calibrationTitle: 'Baş Takibi Kalibrasyonu',
+    calibrationPrompt: 'Ekranın tam ortasına bakın ve hareketsiz durun.',
+    calibrationCountdown: '{seconds} saniye içinde kalibre ediliyor...',
+    calibrationSuccess: 'Kalibrasyon başarılı! Baş takibi etkinleştirildi.',
+
+    // Camera Error Modal
+    cameraErrorTitle: 'Kamera Erişimi Gerekli',
+    cameraDenied: 'Kamera erişimi reddedildi. Baş takibini etkinleştirmek için tarayıcınızdan kamera izni verin.',
+    cameraNotFound: 'Bu cihazda kamera algılanamadı. Lütfen bir web kamerası bağlayın veya klavye/dokunmatik kontrolleri kullanın.',
+    cameraGenericError: 'Kamera akışı başlatılamadı. Lütfen kamera ayarlarınızı kontrol edip tekrar deneyin.',
+
+    // Audio Navigation ARIA Announcements
+    audioNavStatusMuted: 'Sesli navigasyon sessize alındı',
+    audioNavStatusUnmuted: 'Sesli navigasyon sesi açıldı',
+    audioNavVolumeChanged: 'Ses düzeyi %{percent}',
+    audioFallbackNotice: 'Ses kanalları yüklenemedi, sentezlenmiş armonik sesler devrede.',
+
+    // Additional Remediated Keys
+    calibrationTimeout: 'Kalibrasyon zaman aşımına uğradı. Işık yetersiz olabilir veya yüzünüz algılanamadı. Lütfen yüzünüzü ortalayın ve tekrar deneyin.',
+    calibrationRetry: 'Tekrar Dene',
+    cancel: 'İptal',
+    muted: 'Sessiz',
+    unmute: 'Sesli navigasyonun sesini aç',
+    mute: 'Sesli navigasyonu sessize al',
+    alternativeControls: 'Alternatif Kontroller Mevcut',
+
+    // Dynamic Audio Packs (Sound Sets)
+    soundPack: 'Ses Paketi',
+    soundPackDesc: 'Navigasyon için dinamik çok kanallı ses temasını seçin.',
+    soundPackClassic: 'Klasik (Orkestra)',
+    soundPackOrganic: 'Organik (Akustik)',
+    soundPackSynth: 'Sentezleyici (Elektronik)',
+    soundPackClockwork: 'Saat Mekanizması (Mekanik)',
+    audioPackClassic: 'Klasik (Orkestra)',
+    audioPackOrganic: 'Organik (Akustik)',
+    audioPackSynth: 'Sentezleyici (Elektronik)',
+    audioPackClockwork: 'Saat Mekanizması (Mekanik)',
+    audioPackDownloading: 'Ses Paketi İndiriliyor...',
+    audioPackDownloadProgress: '{pack} indiriliyor: %{percent}',
+    audioPackDownloadComplete: 'İndirme tamamlandı!',
+    audioPackDownloadFailed: 'Ses paketi indirilemedi. Lütfen internet bağlantınızı kontrol edin.',
+    'settings.soundPack': 'Ses Paketi',
+    'settings.soundPackDesc': 'Navigasyon için dinamik çok kanallı ses temasını seçin.',
+    'settings.soundPackClassic': 'Klasik (Orkestra)',
+    'settings.soundPackOrganic': 'Organik (Akustik)',
+    'settings.soundPackSynth': 'Sentezleyici (Elektronik)',
+    'settings.soundPackClockwork': 'Saat Mekanizması (Mekanik)',
+    'audioPack.downloading': 'Ses Paketi İndiriliyor...',
+    'audioPack.downloadProgress': '{pack} indiriliyor: %{percent}',
+    'audioPack.downloadComplete': 'İndirme tamamlandı!',
+    'audioPack.downloadFailed': 'Ses paketi indirilemedi. Lütfen internet bağlantınızı kontrol edin.',
+    keyCollected: 'Anahtar alındı! Kapı açıldı, çıkışa doğru ilerleyin.',
   },
   pt: {
     appTitle: 'Maze Daily',
@@ -488,6 +1049,75 @@ export const TRANSLATIONS: Record<LanguageMode, TranslationContent> = {
       inversion: { name: 'Inversão', desc: 'Os controles estão invertidos!' },
       switches_and_barriers: { name: 'Interruptores', desc: 'Alterna os portões de barreira.' },
     },
+    // Accessibility Section & Toggles
+    accessibility: 'Acessibilidade',
+    headTracking: 'Rastreamento de Cabeça',
+    headTrackingDesc: 'Controle o movimento do vagalume inclinando suavemente a cabeça diante da câmera.',
+    headTrackingRecalibrate: 'Recalibrar',
+    audioNav: 'Navegação por Áudio',
+    audioNavDesc: 'Sinalizador estéreo de saída e camadas musicais dinâmicas para navegação às cegas.',
+    audioNavVolume: 'Volume da Navegação por Áudio',
+    audioNavHotkeys: 'Atalhos de volume: [ / ] ou - / + (passo de 5%), M para silenciar.',
+
+    // Download Progress Modal
+    downloadingTitle: 'Baixando Recursos de Acessibilidade',
+    downloadingProgress: 'Baixando {module}: {percent}%',
+    downloadComplete: 'Download concluído!',
+    downloadFailed: 'Falha ao baixar recursos do módulo. Verifique sua conexão com a internet.',
+
+    // Calibration Modal
+    calibrationTitle: 'Calibração do Rastreamento de Cabeça',
+    calibrationPrompt: 'Olhe fixamente para o centro da tela e permaneça imóvel.',
+    calibrationCountdown: 'Calibrando em {seconds}s...',
+    calibrationSuccess: 'Calibração concluída com sucesso! Rastreamento ativo.',
+
+    // Camera Error Modal
+    cameraErrorTitle: 'Acesso à Câmera Necessário',
+    cameraDenied: 'O acesso à câmera foi negado. Conceda permissão de câmera no navegador para ativar o rastreamento.',
+    cameraNotFound: 'Nenhuma câmera detectada neste dispositivo. Conecte uma webcam ou use o teclado/toque.',
+    cameraGenericError: 'Não foi possível iniciar o vídeo da câmera. Verifique as configurações e tente novamente.',
+
+    // Audio Navigation ARIA Announcements
+    audioNavStatusMuted: 'Navegação por áudio silenciada',
+    audioNavStatusUnmuted: 'Navegação por áudio com som ativado',
+    audioNavVolumeChanged: 'Volume {percent}%',
+    audioFallbackNotice: 'Faixas de áudio indisponíveis, usando harmonia sintetizada alternativa.',
+
+    // Additional Remediated Keys
+    calibrationTimeout: 'Tempo limite de calibração esgotado. A iluminação pode ser insuficiente ou seu rosto não está visível. Centralize o rosto e tente novamente.',
+    calibrationRetry: 'Tentar novamente',
+    cancel: 'Cancelar',
+    muted: 'Mudo',
+    unmute: 'Ativar som da navegação em áudio',
+    mute: 'Silenciar navegação em áudio',
+    alternativeControls: 'Controles alternativos disponíveis',
+
+    // Dynamic Audio Packs (Sound Sets)
+    soundPack: 'Pacote de Sons',
+    soundPackDesc: 'Selecione o tema de áudio dinâmico para navegação.',
+    soundPackClassic: 'Clássico (Orquestral)',
+    soundPackOrganic: 'Orgânico (Acústico)',
+    soundPackSynth: 'Sintetizador (Eletrônico)',
+    soundPackClockwork: 'Engrenagem (Mecânico)',
+    audioPackClassic: 'Clássico (Orquestral)',
+    audioPackOrganic: 'Orgânico (Acústico)',
+    audioPackSynth: 'Sintetizador (Eletrônico)',
+    audioPackClockwork: 'Engrenagem (Mecânico)',
+    audioPackDownloading: 'Baixando Pacote de Sons...',
+    audioPackDownloadProgress: 'Baixando {pack}: {percent}%',
+    audioPackDownloadComplete: 'Download concluído!',
+    audioPackDownloadFailed: 'Falha ao baixar pacote de sons. Verifique sua conexão com a internet.',
+    'settings.soundPack': 'Pacote de Sons',
+    'settings.soundPackDesc': 'Selecione o tema de áudio dinâmico para navegação.',
+    'settings.soundPackClassic': 'Clássico (Orquestral)',
+    'settings.soundPackOrganic': 'Orgânico (Acústico)',
+    'settings.soundPackSynth': 'Sintetizador (Eletrônico)',
+    'settings.soundPackClockwork': 'Engrenagem (Mecânico)',
+    'audioPack.downloading': 'Baixando Pacote de Sons...',
+    'audioPack.downloadProgress': 'Baixando {pack}: {percent}%',
+    'audioPack.downloadComplete': 'Download concluído!',
+    'audioPack.downloadFailed': 'Falha ao baixar pacote de sons. Verifique sua conexão com a internet.',
+    keyCollected: 'Chave coletada! O portão está aberto, vá para a saída.',
   },
 };
 
@@ -508,3 +1138,23 @@ export function formatDelta(current: number | null, pb: number | null): { text: 
   const absSec = (Math.abs(diff) / 1000).toFixed(2);
   return { text: `${sign}${absSec}s`, isFaster };
 }
+
+/**
+ * Safely substitutes named placeholders like `{percent}`, `{seconds}`, `{module}`
+ * in a localized template string.
+ *
+ * @param template The template string containing `{key}` tokens.
+ * @param vars An object mapping token names to replacement strings or numbers.
+ * @returns The formatted string with tokens replaced.
+ */
+export function formatString(
+  template: string,
+  vars: Record<string, string | number> = {}
+): string {
+  if (!template) return '';
+  return template.replace(/\{([a-zA-Z0-9_]+)\}/g, (match, key) => {
+    const value = vars[key];
+    return value !== undefined && value !== null ? String(value) : match;
+  });
+}
+

@@ -8,10 +8,16 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "generate:midi": "node scripts/generate-midi-stems.js",
+    "generate:midi:organic": "node scripts/generate-organic-midi-stems.js",
+    "generate:midi:synth": "node scripts/generate-synth-midi-stems.js",
+    "generate:midi:clockwork": "node scripts/generate-clockwork-midi-stems.js",
+    "generate:midi:cosmic": "node scripts/generate-cosmic-midi-stems.js",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "@mediapipe/tasks-vision": "^1.0.1",
     "canvas-confetti": "^1.9.4",
     "lucide-react": "^1.48.0",
     "react": "^19.2.8",
@@ -19,6 +25,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@tonejs/midi": "^2.0.28",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
@@ -29,6 +36,7 @@
     "eslint-plugin-react-refresh": "^0.5.6",
     "gh-pages": "^6.3.0",
     "globals": "^17.12.0",
+    "midi-writer-js": "^3.2.1",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.69.0",
     "vite": "^8.3.0"

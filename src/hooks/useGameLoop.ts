@@ -5,12 +5,24 @@ import { revealFogRadius } from '../core/effects';
 import { updatePlayerPhysics } from '../core/physics';
 import type { BreadcrumbPoint, DailyEffectState, MazeData, Point, SplitCheckpoint } from '../types/game';
 
-interface UseGameLoopProps {
+export interface UseGameLoopProps {
   mazeData: MazeData;
   initialEffect: DailyEffectState;
   pbSplits: (number | null)[];
   getInputVector: () => Point;
   onWin: (durationMs: number, splits: number[], path: BreadcrumbPoint[]) => void;
+  onWallCollision?: (side?: import('../core/physics').CollisionSide) => void; // onWallCollision?: () => void;
+  onPlayerPositionUpdate?: (
+    pos: Point,
+    mazeData: MazeData,
+    collided: boolean,
+    side?: import('../core/physics').CollisionSide,
+    isPushingWall?: boolean,
+    effect?: DailyEffectState,
+    checkpoints?: SplitCheckpoint[]
+  ) => void;
+  onVictory?: () => void;
+  onAudioResume?: () => void;
 }
 
 export function useGameLoop({
@@ -19,6 +31,10 @@ export function useGameLoop({
   pbSplits,
   getInputVector,
   onWin,
+  onWallCollision,
+  onPlayerPositionUpdate,
+  onVictory,
+  onAudioResume,
 }: UseGameLoopProps) {
   const [playerPos, setPlayerPos] = useState<Point>({
     x: mazeData.start.col + 0.5,
@@ -28,6 +44,7 @@ export function useGameLoop({
   const [checkpoints, setCheckpoints] = useState<SplitCheckpoint[]>(() =>
     mazeData.checkpoints.map((cp, idx) => ({ ...cp, pbTimeMs: pbSplits[idx] ?? null }))
   );
+  const checkpointsRef = useRef<SplitCheckpoint[]>(checkpoints);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
@@ -49,6 +66,10 @@ export function useGameLoop({
   // Stable callbacks in refs to prevent animation loop restarts
   const getInputVectorRef = useRef(getInputVector);
   const onWinRef = useRef(onWin);
+  const onWallCollisionRef = useRef(onWallCollision);
+  const onPlayerPositionUpdateRef = useRef(onPlayerPositionUpdate);
+  const onVictoryRef = useRef(onVictory);
+  const onAudioResumeRef = useRef(onAudioResume);
 
   useEffect(() => {
     getInputVectorRef.current = getInputVector;
@@ -57,6 +78,22 @@ export function useGameLoop({
   useEffect(() => {
     onWinRef.current = onWin;
   }, [onWin]);
+
+  useEffect(() => {
+    onWallCollisionRef.current = onWallCollision;
+  }, [onWallCollision]);
+
+  useEffect(() => {
+    onPlayerPositionUpdateRef.current = onPlayerPositionUpdate;
+  }, [onPlayerPositionUpdate]);
+
+  useEffect(() => {
+    onVictoryRef.current = onVictory;
+  }, [onVictory]);
+
+  useEffect(() => {
+    onAudioResumeRef.current = onAudioResume;
+  }, [onAudioResume]);
 
   useEffect(() => {
     effectRef.current = effect;
@@ -81,13 +118,13 @@ export function useGameLoop({
     }
     setEffect(freshEffect);
     setPlayerPos({ x: sx, y: sy });
-    setCheckpoints(
-      mazeData.checkpoints.map((cp, idx) => ({
-        ...cp,
-        reachedTimeMs: null,
-        pbTimeMs: pbSplits[idx] ?? null,
-      }))
-    );
+    const freshCheckpoints = mazeData.checkpoints.map((cp, idx) => ({
+      ...cp,
+      reachedTimeMs: null,
+      pbTimeMs: pbSplits[idx] ?? null,
+    }));
+    checkpointsRef.current = freshCheckpoints;
+    setCheckpoints(freshCheckpoints);
     setElapsedMs(0);
     isPlayingRef.current = false;
     isFinishedRef.current = false;
@@ -121,6 +158,9 @@ export function useGameLoop({
         startTimeRef.current = now;
         lastSampleTimeRef.current = now;
         lastTimerUpdateRef.current = now;
+        if (onAudioResumeRef.current) {
+          onAudioResumeRef.current();
+        }
       }
 
       if (isPlayingRef.current) {
@@ -159,16 +199,6 @@ export function useGameLoop({
           }
         }
 
-        // Record breadcrumbs at 10Hz
-        if (now - lastSampleTimeRef.current >= 1000 / GAME_CONFIG.samplingRateHz) {
-          pathTrackRef.current.push([
-            Math.round(posRef.current.x * 100) / 100,
-            Math.round(posRef.current.y * 100) / 100,
-            Math.round(currentElapsed),
-          ]);
-          lastSampleTimeRef.current = now;
-        }
-
         const pCol = Math.floor(posRef.current.x);
         const pRow = Math.floor(posRef.current.y);
 
@@ -179,12 +209,38 @@ export function useGameLoop({
           if (pCol === target.cell.col && pRow === target.cell.row) {
             splitsRef.current[curIdx] = currentElapsed;
             nextCheckpointIdx.current += 1;
-            setCheckpoints((prev) =>
-              prev.map((cp, idx) =>
-                idx === curIdx ? { ...cp, reachedTimeMs: currentElapsed } : cp
-              )
+            const updated = checkpointsRef.current.map((cp, idx) =>
+              idx === curIdx ? { ...cp, reachedTimeMs: currentElapsed } : cp
             );
+            checkpointsRef.current = updated;
+            setCheckpoints(updated);
           }
+        }
+
+        // Decoupled callbacks for audio navigation position tracking and wall collisions
+        if (onPlayerPositionUpdateRef.current) {
+          onPlayerPositionUpdateRef.current(
+            posRef.current,
+            mazeData,
+            Boolean(nextPhys.collided),
+            nextPhys.collisionSide ?? undefined,
+            Boolean(nextPhys.isPushingWall),
+            effectRef.current,
+            checkpointsRef.current
+          );
+        }
+        if (nextPhys.collided && onWallCollisionRef.current) {
+          onWallCollisionRef.current(nextPhys.collisionSide ?? undefined);
+        }
+
+        // Record breadcrumbs at 10Hz
+        if (now - lastSampleTimeRef.current >= 1000 / GAME_CONFIG.samplingRateHz) {
+          pathTrackRef.current.push([
+            Math.round(posRef.current.x * 100) / 100,
+            Math.round(posRef.current.y * 100) / 100,
+            Math.round(currentElapsed),
+          ]);
+          lastSampleTimeRef.current = now;
         }
 
         // 2. Autonomous Fail-safe Finish Trigger
@@ -195,14 +251,30 @@ export function useGameLoop({
           setIsPlaying(false);
           setElapsedMs(currentElapsed);
           const finalSplits = splitsRef.current.map((c) => c ?? currentElapsed);
-          setCheckpoints((prev) =>
-            prev.map((cp) => ({
-              ...cp,
-              reachedTimeMs: cp.reachedTimeMs ?? currentElapsed,
-            }))
-          );
+          const finalCp = checkpointsRef.current.map((cp) => ({
+            ...cp,
+            reachedTimeMs: cp.reachedTimeMs ?? currentElapsed,
+          }));
+          checkpointsRef.current = finalCp;
+          setCheckpoints(finalCp);
+          if (onVictoryRef.current) {
+            onVictoryRef.current();
+          }
           onWinRef.current(currentElapsed, finalSplits, pathTrackRef.current);
           return;
+        }
+      } else {
+        // Continuously and reliably dispatch player position updates when idle before first move
+        if (onPlayerPositionUpdateRef.current) {
+          onPlayerPositionUpdateRef.current(
+            posRef.current,
+            mazeData,
+            false,
+            undefined,
+            false,
+            effectRef.current,
+            checkpointsRef.current
+          );
         }
       }
 

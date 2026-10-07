@@ -104,4 +104,9 @@ export interface GameSettings {
   playerColor: string;
   showSplits: boolean;
   showControls: boolean;
+  headTrackingEnabled: boolean;
+  audioNavEnabled: boolean;
+  audioNavVolume: number; // 0.0 to 1.0
+  audioNavMuted: boolean;
+  selectedAudioPack: string;
 }

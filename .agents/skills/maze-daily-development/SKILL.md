@@ -102,3 +102,27 @@ src/
     - Checkpoint crossed: `"25% Way: 00:04.12"`
     - Victory: `"Maze Solved! 00:15.30"`
 - Utility `.sr-only` class is available in `index.css` for visually-hidden text.
+
+---
+
+## 7. Modular Accessibility System (Head Tracking & Audio Navigation)
+- **Module Loader & Cache API Service** (`src/services/moduleLoader.ts`):
+  - Uses origin-private Cache API (`caches.open`, `cache.put`, `caches.delete`) isolated from cookies.
+  - Manifest versioning: `MODULE_VERSIONS = { headTracking: '1.0.0', audioNav: '1.0.0' }`.
+  - 10-day retention policy: `localStorage` tracks `maze_daily_module_used_<module>`. Unused or disabled modules beyond 10 days are purged automatically.
+  - Streaming download with byte-level progress reporting (`0% -> 100%`) for `DownloadProgressModal`.
+  - Toggling off in settings deactivates listeners/audio/camera without immediately deleting cached assets.
+- **Head Tracking** (`src/modules/headTracking/`):
+  - Dynamically imports `@mediapipe/tasks-vision` via `import()`.
+  - Tracks nose tip landmark (#1/#4) with 3-second median calibration (`CalibrationModal`).
+  - 5% continuous radial deadzone filters neck micro-tremors, with EMA smoothing.
+  - Normalizes vector `{ x, y }` directly into `setJoystickVector` in `useControls.ts`.
+  - Error recovery: `CameraErrorModal` handles permission denials and missing hardware gracefully with keyboard/touch fallback.
+- **Audio Navigation** (`src/modules/audioNav/`):
+  - Multi-bus Web Audio API (`AudioContext`, `StereoPannerNode`, `GainNode`).
+  - Autoplay compliance: strictly calls `audioCtx.resume()` inside user gesture events.
+  - Reverse BFS acoustic beacon: dynamically positions stereo panner `[-1.0, 1.0]` toward the next cell on the shortest path to exit, with pitch elevation (440Hz -> 800Hz) as the goal nears.
+  - 4-stem vertical soundtrack (`stem-1.mp3` through `stem-4.mp3`, `final.mp3`) with synchronized looping, quartile crossfading (0-25%, 25-50%, 50-75%, 75-100%), and 4-layer harmonic sine drone fallback on missing stems.
+  - Synthesized wall collisions: 50ms sine sweep (150Hz -> 40Hz) with haptic vibration `navigator.vibrate([40])` and strict `>= 280ms` rate-limiting cooldown.
+  - Hotkeys: `+`/`-` or `[`/`]` (10% step) and `M` (mute toggle) with audible confirmation beeps.
+

@@ -1,4 +1,4 @@
-import { GAME_CONFIG } from '../config/gameConfig';
+import { GAME_CONFIG } from '../config/gameConfig.ts';
 import type { GridCoord, MazeCell, SplitCheckpoint } from '../types/game';
 
 interface BFSResult {
@@ -109,4 +109,72 @@ export function analyzeMazeNavigation(grid: MazeCell[][]) {
   }
 
   return { start, exit, shortestPath, checkpoints };
+}
+
+export interface NavigationField {
+  target: GridCoord;
+  distances: number[][]; // [row][col] -> distance in steps to target, or -1 if unreachable
+  nextSteps: (GridCoord | null)[][]; // [row][col] -> next tile towards target along shortest path
+  maxDistance: number;
+}
+
+/**
+ * Computes a reverse BFS distance field from the target (exit) across the maze grid.
+ * Provides O(1) instantaneous lookup for the next tile on the shortest path to target.
+ *
+ * @param grid 2D array of maze cells
+ * @param target Destination tile (exit)
+ * @returns Precomputed NavigationField
+ */
+export function computeExitNavigationField(
+  grid: MazeCell[][],
+  target: GridCoord,
+  blockedTile?: GridCoord | null
+): NavigationField {
+  const rows = grid.length;
+  const cols = grid[0].length;
+
+  const distances: number[][] = Array.from({ length: rows }, () => new Array(cols).fill(-1));
+  const nextSteps: (GridCoord | null)[][] = Array.from({ length: rows }, () =>
+    new Array(cols).fill(null)
+  );
+
+  if (target.row < 0 || target.row >= rows || target.col < 0 || target.col >= cols) {
+    return { target, distances, nextSteps, maxDistance: 0 };
+  }
+
+  // Pointer-based queue avoids array shift overhead
+  const queue: GridCoord[] = [target];
+  distances[target.row][target.col] = 0;
+  nextSteps[target.row][target.col] = null;
+
+  let head = 0;
+  let maxDistance = 0;
+
+  while (head < queue.length) {
+    const current = queue[head++];
+    const currentDist = distances[current.row][current.col];
+    if (currentDist > maxDistance) {
+      maxDistance = currentDist;
+    }
+
+    const currentCell = grid[current.row][current.col];
+    const neighbors = getPassableNeighbors(currentCell, grid);
+
+    for (let i = 0; i < neighbors.length; i++) {
+      const n = neighbors[i];
+      // Skip impassable/locked tiles (e.g. locked gate during Key & Gate effect)
+      if (blockedTile && n.row === blockedTile.row && n.col === blockedTile.col) {
+        continue;
+      }
+      if (distances[n.row][n.col] === -1) {
+        distances[n.row][n.col] = currentDist + 1;
+        // Stepping from neighbor n to current brings the player 1 step closer to target
+        nextSteps[n.row][n.col] = current;
+        queue.push(n);
+      }
+    }
+  }
+
+  return { target, distances, nextSteps, maxDistance };
 }

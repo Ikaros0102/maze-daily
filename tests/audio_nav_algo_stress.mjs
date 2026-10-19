@@ -740,22 +740,23 @@ suite('2. Spatial Panning & Elevation Math (BeaconSynthesizer)', () => {
 // SUITE 3: Equal-Power Quartile Crossfading (calculateQuartileGains)
 // ============================================================================
 
-suite('3. Equal-Power Quartile Crossfading Math (calculateQuartileGains)', () => {
-  // Test 3.1: Power Sum Invariant: g1^2 + g2^2 + g3^2 + g4^2 == 1.0 across 10,001 points in [0.0, 1.0]
-  let maxPowerDeviation = 0;
+suite('3. Additive Vertical Layering Math (calculateQuartileGains)', () => {
+  // Test 3.1: Additive Foundation Invariant: stem1 == 1.0 across all 10,001 points in [0.0, 1.0]
   const numSteps = 10000;
-
   for (let i = 0; i <= numSteps; i++) {
     const p = i / numSteps;
     const { stem1, stem2, stem3, stem4 } = calculateQuartileGains(p, 'equal-power');
-    const powerSum = stem1 * stem1 + stem2 * stem2 + stem3 * stem3 + stem4 * stem4;
-    const deviation = Math.abs(powerSum - 1.0);
-    if (deviation > maxPowerDeviation) {
-      maxPowerDeviation = deviation;
+    assert(Math.abs(stem1 - 1.0) < 1e-12, `Stem 1 is always 1.0 at p=${p}`);
+    if (p <= 0.25) {
+      assert(stem2 === 0 && stem3 === 0 && stem4 === 0, `Stems 2,3,4 silent at p=${p}`);
+    } else if (p <= 0.50) {
+      assert(stem2 >= 0 && stem2 <= 1.0 && stem3 === 0 && stem4 === 0, `Stem 2 ramps at p=${p}`);
+    } else if (p <= 0.75) {
+      assert(Math.abs(stem2 - 1.0) < 1e-12 && stem3 >= 0 && stem3 <= 1.0 && stem4 === 0, `Stem 3 ramps at p=${p}`);
+    } else {
+      assert(Math.abs(stem2 - 1.0) < 1e-12 && Math.abs(stem3 - 1.0) < 1e-12 && stem4 >= 0 && stem4 <= 1.0, `Stem 4 ramps at p=${p}`);
     }
   }
-
-  assert(maxPowerDeviation < 1e-12, `Equal-power invariant holds across all 10,001 points (max deviation: ${maxPowerDeviation.toExponential(4)})`);
 
   // Test 3.2: Exact Quartile Boundary Anchors
   // p = 0.0: stem1 = 1.0, rest 0
@@ -766,49 +767,58 @@ suite('3. Equal-Power Quartile Crossfading Math (calculateQuartileGains)', () =>
   const q25 = calculateQuartileGains(0.25);
   assert(q25.stem1 === 1.0 && q25.stem2 === 0 && q25.stem3 === 0 && q25.stem4 === 0, 'p = 0.25: stem1 = 1.0');
 
-  // p = 0.375 (midpoint Q2): stem1 = cos(pi/4) ~= 0.70710678, stem2 = sin(pi/4) ~= 0.70710678
+  // p = 0.375 (midpoint Q2): stem1 = 1.0, stem2 = sin(pi/4) ~= 0.70710678
   const q375 = calculateQuartileGains(0.375);
   const expectedHalfPower = Math.SQRT1_2; // 1 / sqrt(2)
-  assert(Math.abs(q375.stem1 - expectedHalfPower) < 1e-12, 'p = 0.375: stem1 == sqrt(1/2) (half power)');
+  assert(Math.abs(q375.stem1 - 1.0) < 1e-12, 'p = 0.375: stem1 remains 1.0');
   assert(Math.abs(q375.stem2 - expectedHalfPower) < 1e-12, 'p = 0.375: stem2 == sqrt(1/2) (half power)');
   assert(q375.stem3 === 0 && q375.stem4 === 0, 'p = 0.375: stems 3 and 4 are zero');
 
-  // p = 0.50: stem2 = 1.0, rest 0
+  // p = 0.50: stem1 = 1.0, stem2 = 1.0, rest 0
   const q50 = calculateQuartileGains(0.50);
-  assert(Math.abs(q50.stem2 - 1.0) < 1e-12 && Math.abs(q50.stem1) < 1e-12 && q50.stem3 === 0 && q50.stem4 === 0, 'p = 0.50: stem2 = 1.0');
+  assert(Math.abs(q50.stem1 - 1.0) < 1e-12 && Math.abs(q50.stem2 - 1.0) < 1e-12 && q50.stem3 === 0 && q50.stem4 === 0, 'p = 0.50: stem1 = 1.0, stem2 = 1.0');
 
-  // p = 0.625 (midpoint Q3): stem2 = half power, stem3 = half power
+  // p = 0.625 (midpoint Q3): stem1 = 1.0, stem2 = 1.0, stem3 = half power
   const q625 = calculateQuartileGains(0.625);
-  assert(Math.abs(q625.stem2 - expectedHalfPower) < 1e-12, 'p = 0.625: stem2 == sqrt(1/2)');
+  assert(Math.abs(q625.stem1 - 1.0) < 1e-12 && Math.abs(q625.stem2 - 1.0) < 1e-12, 'p = 0.625: stems 1 and 2 remain 1.0');
   assert(Math.abs(q625.stem3 - expectedHalfPower) < 1e-12, 'p = 0.625: stem3 == sqrt(1/2)');
+  assert(q625.stem4 === 0, 'p = 0.625: stem 4 is zero');
 
-  // p = 0.75: stem3 = 1.0, rest 0
+  // p = 0.75: stems 1, 2, 3 = 1.0, rest 0
   const q75 = calculateQuartileGains(0.75);
-  assert(Math.abs(q75.stem3 - 1.0) < 1e-12 && Math.abs(q75.stem2) < 1e-12 && q75.stem1 === 0 && q75.stem4 === 0, 'p = 0.75: stem3 = 1.0');
+  assert(Math.abs(q75.stem1 - 1.0) < 1e-12 && Math.abs(q75.stem2 - 1.0) < 1e-12 && Math.abs(q75.stem3 - 1.0) < 1e-12 && q75.stem4 === 0, 'p = 0.75: stems 1..3 = 1.0');
 
-  // p = 0.875 (midpoint Q4): stem3 = half power, stem4 = half power
+  // p = 0.875 (midpoint Q4): stems 1..3 = 1.0, stem4 = half power
   const q875 = calculateQuartileGains(0.875);
-  assert(Math.abs(q875.stem3 - expectedHalfPower) < 1e-12, 'p = 0.875: stem3 == sqrt(1/2)');
+  assert(Math.abs(q875.stem1 - 1.0) < 1e-12 && Math.abs(q875.stem2 - 1.0) < 1e-12 && Math.abs(q875.stem3 - 1.0) < 1e-12, 'p = 0.875: stems 1..3 remain 1.0');
   assert(Math.abs(q875.stem4 - expectedHalfPower) < 1e-12, 'p = 0.875: stem4 == sqrt(1/2)');
 
-  // p = 1.0: stem4 = 1.0, rest 0
+  // p = 1.0: all 4 stems = 1.0
   const q100 = calculateQuartileGains(1.0);
-  assert(Math.abs(q100.stem4 - 1.0) < 1e-12 && Math.abs(q100.stem3) < 1e-12 && q100.stem1 === 0 && q100.stem2 === 0, 'p = 1.0: stem4 = 1.0');
+  assert(Math.abs(q100.stem1 - 1.0) < 1e-12 && Math.abs(q100.stem2 - 1.0) < 1e-12 && Math.abs(q100.stem3 - 1.0) < 1e-12 && Math.abs(q100.stem4 - 1.0) < 1e-12, 'p = 1.0: all stems = 1.0');
 
   // Test 3.3: Clamping of Out-Of-Bounds Inputs
   const qNeg = calculateQuartileGains(-0.5);
   assert(qNeg.stem1 === 1.0 && qNeg.stem2 === 0 && qNeg.stem3 === 0 && qNeg.stem4 === 0, 'p = -0.5 is clamped to p = 0.0');
 
   const qOver = calculateQuartileGains(1.5);
-  assert(Math.abs(qOver.stem4 - 1.0) < 1e-12 && qOver.stem1 === 0 && qOver.stem2 === 0 && Math.abs(qOver.stem3) < 1e-12, 'p = 1.5 is clamped to p = 1.0');
+  assert(Math.abs(qOver.stem1 - 1.0) < 1e-12 && Math.abs(qOver.stem2 - 1.0) < 1e-12 && Math.abs(qOver.stem3 - 1.0) < 1e-12 && Math.abs(qOver.stem4 - 1.0) < 1e-12, 'p = 1.5 is clamped to p = 1.0');
 
   // Test 3.4: Linear Curve Mode Verification
-  for (let i = 0; i <= 100; i++) {
-    const p = i / 100;
-    const { stem1, stem2, stem3, stem4 } = calculateQuartileGains(p, 'linear');
-    const linearSum = stem1 + stem2 + stem3 + stem4;
-    assert(Math.abs(linearSum - 1.0) < 1e-12, `Linear mode sum equals 1.0 at p=${p}`);
-  }
+  const lin0 = calculateQuartileGains(0.0, 'linear');
+  assert(lin0.stem1 === 1.0 && lin0.stem2 === 0 && lin0.stem3 === 0 && lin0.stem4 === 0);
+  const lin375 = calculateQuartileGains(0.375, 'linear');
+  assert(lin375.stem1 === 1.0 && Math.abs(lin375.stem2 - 0.5) < 1e-12 && lin375.stem3 === 0 && lin375.stem4 === 0);
+  const lin50 = calculateQuartileGains(0.50, 'linear');
+  assert(lin50.stem1 === 1.0 && lin50.stem2 === 1.0 && lin50.stem3 === 0 && lin50.stem4 === 0);
+  const lin625 = calculateQuartileGains(0.625, 'linear');
+  assert(lin625.stem1 === 1.0 && lin625.stem2 === 1.0 && Math.abs(lin625.stem3 - 0.5) < 1e-12 && lin625.stem4 === 0);
+  const lin75 = calculateQuartileGains(0.75, 'linear');
+  assert(lin75.stem1 === 1.0 && lin75.stem2 === 1.0 && lin75.stem3 === 1.0 && lin75.stem4 === 0);
+  const lin875 = calculateQuartileGains(0.875, 'linear');
+  assert(lin875.stem1 === 1.0 && lin875.stem2 === 1.0 && lin875.stem3 === 1.0 && Math.abs(lin875.stem4 - 0.5) < 1e-12);
+  const lin100 = calculateQuartileGains(1.0, 'linear');
+  assert(lin100.stem1 === 1.0 && lin100.stem2 === 1.0 && lin100.stem3 === 1.0 && lin100.stem4 === 1.0);
 });
 
 // ============================================================================

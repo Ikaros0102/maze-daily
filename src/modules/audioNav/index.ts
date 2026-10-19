@@ -134,11 +134,11 @@ export class AudioNavManager implements AudioNavController {
       if (dist >= 0) {
         let progress = Math.max(0, Math.min(1, 1 - dist / exitNavField.maxDistance));
 
-        // When checkpoints are provided, strictly clamp progress to the active milestone tier:
-        // - If 25% checkpoint is NOT reached: progress is clamped to [0.0, 0.25] -> ONLY Stem 1 plays
-        // - If 25% reached but 50% NOT reached: progress is clamped to [0.25, 0.50] -> Stem 1 and Stem 2 play
-        // - If 50% reached but 75% NOT reached: progress is clamped to [0.50, 0.75] -> Stem 2 and Stem 3 play
-        // - If 75% reached: progress is clamped to [0.75, 1.00] -> Stem 3 and Stem 4 play
+        // When checkpoints are provided, map directly to the active milestone tier:
+        // - Stage 1 (before 25% checkpoint reached): progress = 0.25 -> stem1 = 1.0 (stem2,3,4 = 0.0)
+        // - Stage 2 (after 25% reached, before 50%): progress = 0.50 -> stem1 = 1.0, stem2 = 1.0 (smooth 1.5s entry via tau = 0.4)
+        // - Stage 3 (after 50% reached, before 75%): progress = 0.75 -> stem1 = 1.0, stem2 = 1.0, stem3 = 1.0 (smooth 1.5s entry)
+        // - Stage 4 (after 75% reached): progress = 1.00 -> all 4 stems = 1.0 (smooth 1.5s entry)
         if (checkpoints && checkpoints.length > 0) {
           let highestRatio = 0;
           for (let i = 0; i < checkpoints.length; i++) {
@@ -150,18 +150,15 @@ export class AudioNavManager implements AudioNavController {
             }
           }
 
-          let nextRatio: number;
           if (highestRatio < 0.25) {
-            nextRatio = 0.25;
+            progress = 0.25;
           } else if (highestRatio < 0.50) {
-            nextRatio = 0.50;
+            progress = 0.50;
           } else if (highestRatio < 0.75) {
-            nextRatio = 0.75;
+            progress = 0.75;
           } else {
-            nextRatio = 1.0;
+            progress = 1.00;
           }
-
-          progress = Math.max(highestRatio, Math.min(nextRatio, progress));
         }
 
         this.stemPlayer.updateProgress(progress);

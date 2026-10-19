@@ -62,14 +62,27 @@ test('Quartile 1 (0% to 25%): Only Stem 1 is active (gain 1.0)', () => {
   }
 });
 
-test('Equal-power crossfade preserves unit total power: sum(gain^2) ~= 1.0 across all progress', () => {
+test('Additive vertical layering preserves active layers at 1.0: 1 -> 1+2 -> 1+2+3 -> 1+2+3+4', () => {
   for (let p = 0; p <= 1.0; p += 0.01) {
     const g = calculateQuartileGains(p, 'equal-power');
-    const totalPower = g.stem1 ** 2 + g.stem2 ** 2 + g.stem3 ** 2 + g.stem4 ** 2;
-    assert(
-      Math.abs(totalPower - 1.0) < 1e-6,
-      `Total power at progress ${p} must equal 1.0, got ${totalPower}`
-    );
+    assert.equal(g.stem1, 1.0, `Stem 1 must always be 1.0 at p=${p}`);
+    if (p <= 0.25) {
+      assert.equal(g.stem2, 0.0);
+      assert.equal(g.stem3, 0.0);
+      assert.equal(g.stem4, 0.0);
+    } else if (p <= 0.50) {
+      assert(g.stem2 >= 0.0 && g.stem2 <= 1.0);
+      assert.equal(g.stem3, 0.0);
+      assert.equal(g.stem4, 0.0);
+    } else if (p <= 0.75) {
+      assert.equal(g.stem2, 1.0);
+      assert(g.stem3 >= 0.0 && g.stem3 <= 1.0);
+      assert.equal(g.stem4, 0.0);
+    } else {
+      assert.equal(g.stem2, 1.0);
+      assert.equal(g.stem3, 1.0);
+      assert(g.stem4 >= 0.0 && g.stem4 <= 1.0);
+    }
   }
 });
 
@@ -77,10 +90,14 @@ test('Extreme/out-of-bounds inputs: <0 clamped to 0, >1 clamped to 1, NaN handli
   const gUnder = calculateQuartileGains(-0.5);
   assert.equal(gUnder.stem1, 1.0);
   assert.equal(gUnder.stem2, 0.0);
+  assert.equal(gUnder.stem3, 0.0);
+  assert.equal(gUnder.stem4, 0.0);
 
   const gOver = calculateQuartileGains(1.5);
+  assert.equal(gOver.stem1, 1.0);
+  assert.equal(gOver.stem2, 1.0);
+  assert.equal(gOver.stem3, 1.0);
   assert.equal(gOver.stem4, 1.0);
-  assert.equal(gOver.stem3, 0.0);
 });
 
 // ----------------------------------------------------------------------------

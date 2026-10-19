@@ -641,22 +641,27 @@ console.log('\n--- Suite 2: Audio Fallback Activation & Sine Harmony Stress ---'
   expectEqual(q25.stem1, 1.0, 'Quartile 25%: Stem 1 remains 1.0');
 
   const qMidQ2 = calculateQuartileGains(0.375, 'equal-power');
-  expectCloseTo(qMidQ2.stem1, Math.SQRT1_2, 0.001, 'Mid-Q2: Stem 1 at equal-power ~0.7071');
+  expectEqual(qMidQ2.stem1, 1.0, 'Mid-Q2: Stem 1 remains 1.0 (additive)');
   expectCloseTo(qMidQ2.stem2, Math.SQRT1_2, 0.001, 'Mid-Q2: Stem 2 at equal-power ~0.7071');
-  expectCloseTo(
-    qMidQ2.stem1 ** 2 + qMidQ2.stem2 ** 2,
-    1.0,
-    0.001,
-    'Mid-Q2: Equal power sum stem1^2 + stem2^2 == 1.0'
-  );
+  expectEqual(qMidQ2.stem3, 0.0, 'Mid-Q2: Stem 3 is at 0.0');
+  expectEqual(qMidQ2.stem4, 0.0, 'Mid-Q2: Stem 4 is at 0.0');
 
   const q50 = calculateQuartileGains(0.5);
+  expectEqual(q50.stem1, 1.0, 'Quartile 50%: Stem 1 remains 1.0 (additive)');
   expectEqual(q50.stem2, 1.0, 'Quartile 50%: Stem 2 is at 1.0');
+  expectEqual(q50.stem3, 0.0, 'Quartile 50%: Stem 3 is at 0.0');
+  expectEqual(q50.stem4, 0.0, 'Quartile 50%: Stem 4 is at 0.0');
 
   const q75 = calculateQuartileGains(0.75);
+  expectEqual(q75.stem1, 1.0, 'Quartile 75%: Stem 1 remains 1.0 (additive)');
+  expectEqual(q75.stem2, 1.0, 'Quartile 75%: Stem 2 remains 1.0 (additive)');
   expectEqual(q75.stem3, 1.0, 'Quartile 75%: Stem 3 is at 1.0');
+  expectEqual(q75.stem4, 0.0, 'Quartile 75%: Stem 4 is at 0.0');
 
   const q100 = calculateQuartileGains(1.0);
+  expectEqual(q100.stem1, 1.0, 'Quartile 100%: Stem 1 remains 1.0 (additive)');
+  expectEqual(q100.stem2, 1.0, 'Quartile 100%: Stem 2 remains 1.0 (additive)');
+  expectEqual(q100.stem3, 1.0, 'Quartile 100%: Stem 3 remains 1.0 (additive)');
   expectEqual(q100.stem4, 1.0, 'Quartile 100%: Stem 4 is at 1.0');
 
   // Verify updateProgress adjusts fallback harmonic layers

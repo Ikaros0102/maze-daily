@@ -958,14 +958,14 @@ await test('4.2 Audio buffer swap and monophonic downmixing recreation (channelC
 });
 
 await test('4.3 Topological progress resynchronization across quartiles (0.0, 0.25, 0.5, 0.75, 1.0)', async () => {
-  // 1. Math verification: calculateQuartileGains equal-power property
+  // 1. Math verification: calculateQuartileGains additive layering property
   const quartiles = [0.0, 0.25, 0.5, 0.75, 1.0];
   const expectedGains = {
     0.0: { stem1: 1.0, stem2: 0.0, stem3: 0.0, stem4: 0.0 },
     0.25: { stem1: 1.0, stem2: 0.0, stem3: 0.0, stem4: 0.0 },
-    0.5: { stem1: 0.0, stem2: 1.0, stem3: 0.0, stem4: 0.0 },
-    0.75: { stem1: 0.0, stem2: 0.0, stem3: 1.0, stem4: 0.0 },
-    1.0: { stem1: 0.0, stem2: 0.0, stem3: 0.0, stem4: 1.0 },
+    0.5: { stem1: 1.0, stem2: 1.0, stem3: 0.0, stem4: 0.0 },
+    0.75: { stem1: 1.0, stem2: 1.0, stem3: 1.0, stem4: 0.0 },
+    1.0: { stem1: 1.0, stem2: 1.0, stem3: 1.0, stem4: 1.0 },
   };
 
   for (const q of quartiles) {
@@ -977,11 +977,27 @@ await test('4.3 Topological progress resynchronization across quartiles (0.0, 0.
     assertClose(gains.stem4, exp.stem4, 0.001, `quartile ${q} stem4`);
   }
 
-  // Equal-power sum of squares check across intermediate points
+  // Additive preservation check across intermediate points
   for (let p = 0; p <= 1.0; p += 0.05) {
     const g = calculateQuartileGains(p, 'equal-power');
-    const power = (g.stem1 ** 2) + (g.stem2 ** 2) + (g.stem3 ** 2) + (g.stem4 ** 2);
-    assertClose(power, 1.0, 0.01, `Equal power preservation at progress ${p}`);
+    assertClose(g.stem1, 1.0, 0.001, `Stem 1 remains active at progress ${p}`);
+    if (p <= 0.25) {
+      assert.strictEqual(g.stem2, 0.0, `Stem 2 is 0.0 at progress ${p}`);
+      assert.strictEqual(g.stem3, 0.0, `Stem 3 is 0.0 at progress ${p}`);
+      assert.strictEqual(g.stem4, 0.0, `Stem 4 is 0.0 at progress ${p}`);
+    } else if (p <= 0.50) {
+      assert(g.stem2 >= 0 && g.stem2 <= 1.0, `Stem 2 ramps at progress ${p}`);
+      assert.strictEqual(g.stem3, 0.0, `Stem 3 is 0.0 at progress ${p}`);
+      assert.strictEqual(g.stem4, 0.0, `Stem 4 is 0.0 at progress ${p}`);
+    } else if (p <= 0.75) {
+      assert.strictEqual(g.stem2, 1.0, `Stem 2 remains 1.0 at progress ${p}`);
+      assert(g.stem3 >= 0 && g.stem3 <= 1.0, `Stem 3 ramps at progress ${p}`);
+      assert.strictEqual(g.stem4, 0.0, `Stem 4 is 0.0 at progress ${p}`);
+    } else {
+      assert.strictEqual(g.stem2, 1.0, `Stem 2 remains 1.0 at progress ${p}`);
+      assert.strictEqual(g.stem3, 1.0, `Stem 3 remains 1.0 at progress ${p}`);
+      assert(g.stem4 >= 0 && g.stem4 <= 1.0, `Stem 4 ramps at progress ${p}`);
+    }
   }
 
   // 2. Live StemPlayer dynamic progress resynchronization

@@ -55,62 +55,36 @@ export const STEM_FILE_PATHS = [
 // ============================================================================
 
 /**
- * Calculates gain levels for all 4 stems across split quartiles.
+ * Calculates gain levels for all 4 stems across split quartiles using Additive Vertical Layering.
  *
- * Quartiles:
- * - 0% - 25%: Stem 1 audible (gain 1.0), Stems 2, 3, 4 gain 0.0
- * - 25% - 50%: Stem 1 fades down, Stem 2 fades in
- * - 50% - 75%: Stem 2 fades down, Stem 3 fades in
- * - 75% - 100%: Stem 3 fades down, Stem 4 fades in
+ * Previous stems NEVER fade out when transitioning to subsequent stages:
+ * - Stage 1 (0% - 25%): Stem 1 audible (gain 1.0), Stems 2, 3, 4 are 0.0
+ * - Stage 2 (25% - 50%): Stem 1 = 1.0, Stem 2 fades in up to 1.0, Stems 3, 4 are 0.0
+ * - Stage 3 (50% - 75%): Stems 1 & 2 = 1.0, Stem 3 fades in up to 1.0, Stem 4 is 0.0
+ * - Stage 4 (75% - 100%): Stems 1, 2 & 3 = 1.0, Stem 4 fades in up to 1.0 (all 4 audible at 1.0 at finish)
  */
 export function calculateQuartileGains(
   progress: number,
   mode: CrossfadeCurve = 'equal-power'
 ): StemGains {
   const p = Math.max(0, Math.min(1, progress));
-  let stem1 = 0;
-  let stem2 = 0;
-  let stem3 = 0;
-  let stem4 = 0;
+  const stem1 = 1.0;
+  let stem2 = 0.0;
+  let stem3 = 0.0;
+  let stem4 = 0.0;
 
-  if (p <= 0.25) {
-    stem1 = 1.0;
-  } else if (p <= 0.5) {
-    const t = (p - 0.25) / 0.25;
-    if (t >= 1) {
-      stem1 = 0.0;
-      stem2 = 1.0;
-    } else if (mode === 'equal-power') {
-      stem1 = Math.cos((t * Math.PI) / 2);
-      stem2 = Math.sin((t * Math.PI) / 2);
-    } else {
-      stem1 = 1.0 - t;
-      stem2 = t;
-    }
-  } else if (p <= 0.75) {
-    const t = (p - 0.5) / 0.25;
-    if (t >= 1) {
-      stem2 = 0.0;
-      stem3 = 1.0;
-    } else if (mode === 'equal-power') {
-      stem2 = Math.cos((t * Math.PI) / 2);
-      stem3 = Math.sin((t * Math.PI) / 2);
-    } else {
-      stem2 = 1.0 - t;
-      stem3 = t;
-    }
-  } else {
+  if (p > 0.75) {
+    stem2 = 1.0;
+    stem3 = 1.0;
     const t = (p - 0.75) / 0.25;
-    if (t >= 1) {
-      stem3 = 0.0;
-      stem4 = 1.0;
-    } else if (mode === 'equal-power') {
-      stem3 = Math.cos((t * Math.PI) / 2);
-      stem4 = Math.sin((t * Math.PI) / 2);
-    } else {
-      stem3 = 1.0 - t;
-      stem4 = t;
-    }
+    stem4 = t >= 1 ? 1.0 : mode === 'equal-power' ? Math.sin((t * Math.PI) / 2) : t;
+  } else if (p > 0.50) {
+    stem2 = 1.0;
+    const t = (p - 0.50) / 0.25;
+    stem3 = t >= 1 ? 1.0 : mode === 'equal-power' ? Math.sin((t * Math.PI) / 2) : t;
+  } else if (p > 0.25) {
+    const t = (p - 0.25) / 0.25;
+    stem2 = t >= 1 ? 1.0 : mode === 'equal-power' ? Math.sin((t * Math.PI) / 2) : t;
   }
 
   return { stem1, stem2, stem3, stem4 };
@@ -224,7 +198,7 @@ export class SineFallbackSynthesizer {
     this.isRunning = true;
   }
 
-  public updateGains(gains: StemGains, tau = 0.08): void {
+  public updateGains(gains: StemGains, tau = 0.4): void {
     if (!this.isRunning || !this.layerGains) return;
     const now = this.ctx.currentTime;
 
@@ -454,7 +428,7 @@ export class StemPlayer implements StemPlayerController {
 
   constructor(config?: StemPlayerConfig) {
     this.crossfadeCurve = config?.crossfadeCurve ?? 'equal-power';
-    this.smoothingTimeConstant = config?.smoothingTimeConstant ?? 0.08;
+    this.smoothingTimeConstant = config?.smoothingTimeConstant ?? 0.4;
     this.forceFallback = Boolean(config?.forceFallback);
 
     if (config?.audioCtx && config?.destination) {
@@ -716,19 +690,20 @@ export class StemPlayer implements StemPlayerController {
   /**
    * Updates player progress toward exit (0.0 to 1.0) and adjusts crossfading.
    */
-  public updateProgress(progress: number): void {
+  public updateProgress(progress: number, customTau?: number): void {
     this.currentProgress = Math.max(0, Math.min(1, progress));
     const gains = calculateQuartileGains(this.currentProgress, this.crossfadeCurve);
 
+    const tau = customTau ?? this.smoothingTimeConstant;
+
     if (this.fallbackActive && this.sineFallback) {
-      this.sineFallback.updateGains(gains, this.smoothingTimeConstant);
+      this.sineFallback.updateGains(gains, tau);
       return;
     }
 
     if (!this.stemGainNodes || this.state !== 'playing' || !this.ctx) return;
 
     const now = this.ctx.currentTime;
-    const tau = this.smoothingTimeConstant;
 
     this.stemGainNodes[0].gain.setTargetAtTime(gains.stem1, now, tau);
     this.stemGainNodes[1].gain.setTargetAtTime(gains.stem2, now, tau);

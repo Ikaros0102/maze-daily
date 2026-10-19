@@ -87,7 +87,7 @@ export interface AudioNavController {
 export interface StemPlayerController {
   init: (ctx: AudioContext, destination: GainNode) => Promise<void>;
   start: () => void;
-  updateProgress: (ratio: number) => void;
+  updateProgress: (ratio: number, customTau?: number) => void;
   updateDirection?: (dx: number, dy: number) => void;
   getCurrentPan?: () => number;
   getCurrentFilterFreq?: () => number;

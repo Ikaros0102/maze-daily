@@ -47,10 +47,20 @@ export type EffectType =
   | 'key_and_gate'
   | 'inversion'
   | 'fake_exits'
-  | 'wobbly_walls'
+  | 'weave_labyrinth'
+  | 'glitch'
   | 'switches_and_barriers';
 
+export type GlitchTransform =
+  | 'none'
+  | 'rotate_cw'
+  | 'rotate_ccw'
+  | 'flip_h'
+  | 'flip_v';
+
 export interface PortalPair {
+  id: number;
+  color: string;
   a: GridCoord;
   b: GridCoord;
 }
@@ -65,13 +75,18 @@ export interface DailyEffectState {
   type: EffectType;
   enabled: boolean;
   fogRevealed?: boolean[][];
-  portals?: PortalPair;
+  portals?: PortalPair[];
   keyPos?: GridCoord;
   gatePos?: GridCoord;
   hasKey?: boolean;
   isGateOpen?: boolean;
   isInverted?: boolean;
   fakeExits?: FakeExit[];
+  glitchTransform?: GlitchTransform;
+  glitchWarning?: boolean;
+  glitchStatic?: boolean;
+  glitchNextSec?: number;
+  glitchCycle?: number;
 }
 
 export type BreadcrumbPoint = [x: number, y: number, timeMs: number];

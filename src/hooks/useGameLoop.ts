@@ -3,6 +3,7 @@ import { GAME_CONFIG } from '../config/gameConfig';
 import { handleInteractiveElements } from '../core/effectInteractions';
 import { revealFogRadius } from '../core/effects';
 import { updatePlayerPhysics } from '../core/physics';
+import { transformInputForGlitch } from './useControls';
 import type { BreadcrumbPoint, DailyEffectState, MazeData, Point, SplitCheckpoint } from '../types/game';
 
 export interface UseGameLoopProps {
@@ -149,7 +150,8 @@ export function useGameLoop({
       const dt = Math.max(0, Math.min(rawDt, 0.05));
       lastTime = now;
 
-      const input = getInputVectorRef.current();
+      const rawInput = getInputVectorRef.current();
+      const input = transformInputForGlitch(rawInput, effectRef.current.glitchTransform);
 
       // Trigger play start on first movement input
       if (!isPlayingRef.current && (input.x !== 0 || input.y !== 0)) {
@@ -183,12 +185,14 @@ export function useGameLoop({
         posRef.current = nextPhys.pos;
         velRef.current = nextPhys.vel;
 
-        // Interactive effect elements (portals, keys, fake exits, fog)
+        // Interactive effect elements (portals, keys, fake exits, fog, glitch)
         const interaction = handleInteractiveElements(
           posRef.current,
           now,
           effectRef.current,
-          portalCooldownRef.current
+          portalCooldownRef.current,
+          mazeData.cells,
+          currentElapsed / 1000
         );
         if (interaction) {
           if (interaction.newPosition) posRef.current = interaction.newPosition;

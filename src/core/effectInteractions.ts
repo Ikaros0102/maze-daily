@@ -1,5 +1,11 @@
+import { GAME_CONFIG } from '../config/gameConfig';
 import { revealFogRadius } from './effects';
-import type { DailyEffectState, Point } from '../types/game';
+import type {
+  DailyEffectState,
+  GlitchTransform,
+  MazeCell,
+  Point,
+} from '../types/game';
 
 export interface InteractionResult {
   updatedEffect: DailyEffectState;
@@ -7,39 +13,57 @@ export interface InteractionResult {
   newCooldown?: number;
 }
 
+const GLITCH_TRANSFORMS: GlitchTransform[] = [
+  'rotate_cw',
+  'rotate_ccw',
+  'flip_h',
+  'flip_v',
+];
+
 export function handleInteractiveElements(
   pos: Point,
   now: number,
   effect: DailyEffectState,
-  portalCooldown: number
+  portalCooldown: number,
+  grid?: MazeCell[][],
+  elapsedSec?: number
 ): InteractionResult | null {
   if (!effect.enabled) return null;
 
-  // 1. Fog of War
+  // 1. Fog of War (Line-of-Sight BFS through open walls)
   if (effect.type === 'fog_of_war' && effect.fogRevealed) {
-    revealFogRadius(effect.fogRevealed, pos.x, pos.y);
+    revealFogRadius(
+      effect.fogRevealed,
+      pos.x,
+      pos.y,
+      3,
+      GAME_CONFIG.maze.cols,
+      GAME_CONFIG.maze.rows,
+      grid
+    );
     return null;
   }
 
-  // 2. Portals
+  // 2. Portals (Multi-pair split-guarded portals)
   if (effect.type === 'portals' && effect.portals && now > portalCooldown) {
-    const { a, b } = effect.portals;
-    const distA = Math.hypot(pos.x - (a.col + 0.5), pos.y - (a.row + 0.5));
-    const distB = Math.hypot(pos.x - (b.col + 0.5), pos.y - (b.row + 0.5));
+    for (const pair of effect.portals) {
+      const distA = Math.hypot(pos.x - (pair.a.col + 0.5), pos.y - (pair.a.row + 0.5));
+      const distB = Math.hypot(pos.x - (pair.b.col + 0.5), pos.y - (pair.b.row + 0.5));
 
-    if (distA < 0.45) {
-      return {
-        updatedEffect: effect,
-        newPosition: { x: b.col + 0.5, y: b.row + 0.5 },
-        newCooldown: now + 1200,
-      };
-    }
-    if (distB < 0.45) {
-      return {
-        updatedEffect: effect,
-        newPosition: { x: a.col + 0.5, y: a.row + 0.5 },
-        newCooldown: now + 1200,
-      };
+      if (distA < 0.45) {
+        return {
+          updatedEffect: effect,
+          newPosition: { x: pair.b.col + 0.5, y: pair.b.row + 0.5 },
+          newCooldown: now + 1200,
+        };
+      }
+      if (distB < 0.45) {
+        return {
+          updatedEffect: effect,
+          newPosition: { x: pair.a.col + 0.5, y: pair.a.row + 0.5 },
+          newCooldown: now + 1200,
+        };
+      }
     }
   }
 
@@ -67,6 +91,62 @@ export function handleInteractiveElements(
       );
       return {
         updatedEffect: { ...effect, fakeExits: updatedExits },
+      };
+    }
+  }
+
+  // 5. Glitch Modifier Runtime State Machine
+  if (effect.type === 'glitch' && typeof elapsedSec === 'number') {
+    const interval = GAME_CONFIG.glitch.intervalSec;
+    const warnDuration = GAME_CONFIG.glitch.warningDurationSec;
+    const staticDuration = GAME_CONFIG.glitch.staticDurationMs / 1000;
+
+    const nextSec = effect.glitchNextSec ?? interval;
+    const cycle = effect.glitchCycle ?? 0;
+
+    // Warning phase: 1.5s before transformation
+    const isWarning = elapsedSec >= nextSec - warnDuration && elapsedSec < nextSec;
+
+    // Static burst phase: [nextSec, nextSec + 0.3s]
+    const isStatic = elapsedSec >= nextSec && elapsedSec < nextSec + staticDuration;
+
+    // Check if new cycle should trigger
+    if (elapsedSec >= nextSec && (!effect.glitchTransform || effect.glitchTransform === 'none' || (effect.glitchCycle ?? 0) === cycle)) {
+      if (isStatic && !effect.glitchStatic) {
+        // Just entered static burst phase: select next deterministic transform
+        const nextTransform = GLITCH_TRANSFORMS[cycle % GLITCH_TRANSFORMS.length];
+        return {
+          updatedEffect: {
+            ...effect,
+            glitchWarning: false,
+            glitchStatic: true,
+            glitchTransform: nextTransform,
+            glitchCycle: cycle + 1,
+          },
+        };
+      }
+    }
+
+    // Advance to next cycle schedule once static burst ends
+    if (elapsedSec >= nextSec + staticDuration && (effect.glitchStatic || effect.glitchWarning)) {
+      return {
+        updatedEffect: {
+          ...effect,
+          glitchWarning: false,
+          glitchStatic: false,
+          glitchNextSec: nextSec + interval,
+        },
+      };
+    }
+
+    // Toggle warning flag
+    if (isWarning !== Boolean(effect.glitchWarning)) {
+      return {
+        updatedEffect: {
+          ...effect,
+          glitchWarning: isWarning,
+          glitchStatic: false,
+        },
       };
     }
   }

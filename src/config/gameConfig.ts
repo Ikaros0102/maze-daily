@@ -39,6 +39,11 @@ export const GAME_CONFIG = {
     friction: 0.985,
     acceleration: 0.08,
   },
+  glitch: {
+    intervalSec: 60,
+    warningDurationSec: 1.5,
+    staticDurationMs: 300,
+  },
   storageKeys: {
     settings: 'maze_daily_settings',
     historyPrefix: 'maze_daily_stats_',
@@ -75,11 +80,11 @@ export const AVAILABLE_EFFECTS: EffectMeta[] = [
     descriptionKey: 'effects.fake_exits.desc',
   },
   {
-    type: 'wobbly_walls',
+    type: 'weave_labyrinth',
     enabled: true,
-    icon: '〰️',
-    nameKey: 'effects.wobbly_walls.name',
-    descriptionKey: 'effects.wobbly_walls.desc',
+    icon: '🧬',
+    nameKey: 'effects.weave.name',
+    descriptionKey: 'effects.weave.desc',
   },
   {
     type: 'portals',
@@ -101,6 +106,13 @@ export const AVAILABLE_EFFECTS: EffectMeta[] = [
     icon: '🔄',
     nameKey: 'effects.inversion.name',
     descriptionKey: 'effects.inversion.desc',
+  },
+  {
+    type: 'glitch',
+    enabled: true,
+    icon: '📺',
+    nameKey: 'effects.glitch.name',
+    descriptionKey: 'effects.glitch.desc',
   },
   {
     type: 'switches_and_barriers',

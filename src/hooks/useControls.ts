@@ -1,9 +1,26 @@
 import { useCallback, useEffect, useRef } from 'react';
-import type { Point } from '../types/game';
+import type { GlitchTransform, Point } from '../types/game';
+
+const cleanZero = (n: number) => (n === 0 ? 0 : n);
+
+export function transformInputForGlitch(vec: Point, transform?: GlitchTransform): Point {
+  if (!transform || transform === 'none') return vec;
+  switch (transform) {
+    case 'rotate_cw':
+      return { x: cleanZero(vec.y), y: cleanZero(-vec.x) };
+    case 'rotate_ccw':
+      return { x: cleanZero(-vec.y), y: cleanZero(vec.x) };
+    case 'flip_h':
+      return { x: cleanZero(-vec.x), y: cleanZero(vec.y) };
+    case 'flip_v':
+      return { x: cleanZero(vec.x), y: cleanZero(-vec.y) };
+  }
+}
 
 interface UseControlsOptions {
   isInverted?: boolean;
   enabled?: boolean;
+  glitchTransform?: GlitchTransform;
 }
 
 const CONTROL_KEYS = new Set([
@@ -13,11 +30,12 @@ const CONTROL_KEYS = new Set([
   'keyd', 'arrowright', 'd', 'в',
 ]);
 
-export function useControls({ isInverted = false, enabled = true }: UseControlsOptions) {
+export function useControls({ isInverted = false, enabled = true, glitchTransform = 'none' }: UseControlsOptions) {
   const joystickVectorRef = useRef<Point>({ x: 0, y: 0 });
   const keysPressed = useRef<Set<string>>(new Set());
   const isInvertedRef = useRef(isInverted);
   const enabledRef = useRef(enabled);
+  const glitchTransformRef = useRef(glitchTransform);
 
   useEffect(() => {
     isInvertedRef.current = isInverted;
@@ -26,6 +44,10 @@ export function useControls({ isInverted = false, enabled = true }: UseControlsO
   useEffect(() => {
     enabledRef.current = enabled;
   }, [enabled]);
+
+  useEffect(() => {
+    glitchTransformRef.current = glitchTransform;
+  }, [glitchTransform]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -126,6 +148,13 @@ export function useControls({ isInverted = false, enabled = true }: UseControlsO
     if (isInvertedRef.current) {
       x = -x;
       y = -y;
+    }
+
+    // Синхронизация вектора управления с поворотом/отражением экрана при глитче
+    if (glitchTransformRef.current && glitchTransformRef.current !== 'none') {
+      const transformed = transformInputForGlitch({ x, y }, glitchTransformRef.current);
+      x = transformed.x;
+      y = transformed.y;
     }
 
     return { x, y };

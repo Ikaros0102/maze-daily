@@ -11,7 +11,7 @@ import type { AudioNavController, AudioNavState, Point2D } from './types.ts';
 import { AudioNavigationEngine } from './engine.ts';
 import { VolumeController } from './volumeController.ts';
 import { StemPlayer } from './stems.ts';
-import { BeaconSynthesizer } from './beacon.ts';
+import { BeaconSynthesizer, transformDirectionForGlitch } from './beacon.ts';
 import { CollisionSynthesizer } from './collisionSynth.ts';
 
 export * from './types.ts';
@@ -175,8 +175,9 @@ export class AudioNavManager implements AudioNavController {
       const row = Math.floor(playerPos.y);
       const nextTile = navField.nextSteps[row]?.[col];
       if (nextTile) {
-        const dx = nextTile.col - col;
-        const dy = nextTile.row - row;
+        const rawDx = nextTile.col - col;
+        const rawDy = nextTile.row - row;
+        const { dx, dy } = transformDirectionForGlitch(rawDx, rawDy, effect?.glitchTransform);
         this.stemPlayer.updateDirection(dx, dy);
       } else {
         this.stemPlayer.updateDirection(0, 0);

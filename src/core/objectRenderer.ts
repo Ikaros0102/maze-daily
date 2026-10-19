@@ -60,19 +60,31 @@ export function drawEffectObjects(
   size: number,
   timeMs: number
 ): void {
-  // Portals
+  // Portals (4 colored pairs)
   if (effect.type === 'portals' && effect.portals) {
     const pulse = Math.sin(timeMs / 200) * 0.15 + 0.85;
-    for (const p of [effect.portals.a, effect.portals.b]) {
-      const cx = (p.col + 0.5) * size;
-      const cy = (p.row + 0.5) * size;
-      ctx.beginPath();
-      ctx.arc(cx, cy, size * 0.35 * pulse, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(168, 85, 247, 0.4)';
-      ctx.fill();
-      ctx.strokeStyle = '#c084fc';
-      ctx.lineWidth = 2;
-      ctx.stroke();
+    for (const pair of effect.portals) {
+      const color = pair.color || '#a855f7';
+      for (const p of [pair.a, pair.b]) {
+        const cx = (p.col + 0.5) * size;
+        const cy = (p.row + 0.5) * size;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, size * 0.36 * pulse, 0, Math.PI * 2);
+        ctx.fillStyle = color + '44';
+        ctx.fill();
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // Inner glowing core
+        ctx.beginPath();
+        ctx.arc(cx, cy, size * 0.15 * pulse, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.restore();
+      }
     }
   }
 

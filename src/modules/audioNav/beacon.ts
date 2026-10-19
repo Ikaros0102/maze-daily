@@ -8,8 +8,28 @@
  */
 
 import { computeExitNavigationField, type NavigationField } from '../../core/pathfinder.ts';
-import type { DailyEffectState, GridCoord, MazeCell, MazeData, Point } from '../../types/game';
+import type { DailyEffectState, GlitchTransform, GridCoord, MazeCell, MazeData, Point } from '../../types/game';
 import type { BeaconSynthesizerController, Point2D } from './types.ts';
+
+const cleanZero = (n: number) => (n === 0 ? 0 : n);
+
+export function transformDirectionForGlitch(
+  dx: number,
+  dy: number,
+  transform?: GlitchTransform
+): { dx: number; dy: number } {
+  if (!transform || transform === 'none') return { dx, dy };
+  switch (transform) {
+    case 'rotate_cw':
+      return { dx: cleanZero(-dy), dy: cleanZero(dx) };
+    case 'rotate_ccw':
+      return { dx: cleanZero(dy), dy: cleanZero(-dx) };
+    case 'flip_h':
+      return { dx: cleanZero(-dx), dy: cleanZero(dy) };
+    case 'flip_v':
+      return { dx: cleanZero(dx), dy: cleanZero(-dy) };
+  }
+}
 
 export interface BeaconConfig {
   pulseIntervalMs?: number; // Default: 750ms (in 600-1000ms range)
@@ -284,8 +304,9 @@ export class BeaconSynthesizer implements BeaconSynthesizerController {
       const nextTile = this.navField.nextSteps[row]?.[col];
       if (!nextTile) return;
 
-      const dx = nextTile.col - col;
-      const dy = nextTile.row - row;
+      const rawDx = nextTile.col - col;
+      const rawDy = nextTile.row - row;
+      const { dx, dy } = transformDirectionForGlitch(rawDx, rawDy, effect?.glitchTransform);
 
       if (dx > 0) {
         // Step is strictly to the Right -> Hard Right (100% Right, 0% Left)

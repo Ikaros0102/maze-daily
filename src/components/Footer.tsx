@@ -47,7 +47,7 @@ export const Footer: React.FC<FooterProps> = ({ lang, isDarkTheme }) => {
       <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
         <span>Engine: {GAME_CONFIG.version}</span>
         <a
-          href="https://github.com"
+          href="https://github.com/Ikaros0102"
           target="_blank"
           rel="noreferrer"
           aria-label="GitHub repository (opens in a new tab)"

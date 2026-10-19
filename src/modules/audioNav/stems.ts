@@ -50,8 +50,6 @@ export const STEM_FILE_PATHS = [
   'audio/stems/stem-4.m4a',
 ] as const;
 
-export const FINAL_FANFARE_PATH = 'audio/stems/final.mp3';
-
 // ============================================================================
 // Mathematical Crossfade Calculation
 // ============================================================================
@@ -427,7 +425,7 @@ export class StemPlayer implements StemPlayerController {
   private forceFallback = false;
 
   private stemBuffers: AudioBuffer[] = [];
-  private finalBuffer: AudioBuffer | null = null;
+  public finalBuffer: AudioBuffer | null = null;
   private commonLoopDuration = 0;
 
   private stemGainNodes: [GainNode, GainNode, GainNode, GainNode] | null = null;
@@ -436,8 +434,8 @@ export class StemPlayer implements StemPlayerController {
   private filterNode: BiquadFilterNode | null = null;
   private pannerNode: StereoPannerNode | null = null;
 
-  private fanfareSource: AudioBufferSourceNode | null = null;
-  private fanfareGain: GainNode | null = null;
+  public fanfareSource: AudioBufferSourceNode | null = null;
+  public fanfareGain: GainNode | null = null;
   private fadeTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   private currentTargetPan = 0.0;
@@ -610,14 +608,7 @@ export class StemPlayer implements StemPlayerController {
 
       this.stemBuffers = buffers;
       this.commonLoopDuration = Math.min(...buffers.map((b) => b.duration));
-
-      // Attempt to load final fanfare (non-fatal if missing)
-      try {
-        this.finalBuffer = await this.loadBuffer(FINAL_FANFARE_PATH);
-      } catch (finalErr) {
-        console.warn('[StemPlayer] final.mp3 load failed; will use synthetic fanfare:', finalErr);
-        this.finalBuffer = null;
-      }
+      this.finalBuffer = null;
 
       this.initStemGainNodes();
       this.state = 'ready';
@@ -782,64 +773,9 @@ export class StemPlayer implements StemPlayerController {
       this.fadeTimeoutId = null;
     }, 150);
 
-    if (this.finalBuffer) {
-      if (this.fanfareSource) {
-        try {
-          this.fanfareSource.stop();
-          this.fanfareSource.disconnect();
-        } catch {
-          // Ignore
-        }
-        this.fanfareSource = null;
-      }
-      if (this.fanfareGain) {
-        try {
-          this.fanfareGain.disconnect();
-        } catch {
-          // Ignore
-        }
-        this.fanfareGain = null;
-      }
-
-      const fanfareSrc = this.ctx.createBufferSource();
-      fanfareSrc.buffer = this.finalBuffer;
-      fanfareSrc.loop = false;
-
-      const fanfareGain = this.ctx.createGain();
-      fanfareGain.gain.setValueAtTime(1.0, now);
-      try {
-        fanfareGain.channelCount = 1;
-        fanfareGain.channelCountMode = 'explicit';
-      } catch {
-        // Fallback for mock environments
-      }
-
-      fanfareSrc.connect(fanfareGain);
-      fanfareGain.connect(this.stemsBus);
-
-      fanfareSrc.start(now);
-      this.fanfareSource = fanfareSrc;
-      this.fanfareGain = fanfareGain;
-
-      fanfareSrc.onended = () => {
-        try {
-          fanfareSrc.disconnect();
-          fanfareGain.disconnect();
-        } catch {
-          // Cleanup
-        }
-        if (this.fanfareSource === fanfareSrc) {
-          this.fanfareSource = null;
-        }
-        if (this.fanfareGain === fanfareGain) {
-          this.fanfareGain = null;
-        }
-      };
-    } else {
-      this.sineFallback =
-        this.sineFallback ?? new SineFallbackSynthesizer(this.ctx, this.stemsBus);
-      this.sineFallback.playFanfare();
-    }
+    this.sineFallback =
+      this.sineFallback ?? new SineFallbackSynthesizer(this.ctx, this.stemsBus);
+    this.sineFallback.playFanfare();
 
     this.state = 'stopped';
   }
@@ -1021,8 +957,7 @@ export class StemPlayer implements StemPlayerController {
       this.currentPackId === packId &&
       this.stemBuffers.length === 4 &&
       this.state !== 'unloaded' &&
-      !this.fallbackActive &&
-      (pack.finalTrack ? this.finalBuffer !== null : true)
+      !this.fallbackActive
     ) {
       onProgress?.(100);
       touchAudioPackUsage(packId);
@@ -1142,36 +1077,8 @@ export class StemPlayer implements StemPlayerController {
         return false;
       }
 
-      // 6. Fanfare handling
-      let decodedFinal: AudioBuffer | null = null;
-      if (pack.finalTrack) {
-        try {
-          const rawFinal = await getCachedAudioPackAssetBuffer(packId, pack.finalTrack);
-          const finalCopy = rawFinal.slice(0);
-          decodedFinal = await new Promise<AudioBuffer>((resolve, reject) => {
-            if (!this.ctx) {
-              reject(new Error('AudioContext missing during fanfare decoding'));
-              return;
-            }
-            this.ctx.decodeAudioData(finalCopy, resolve, reject);
-          });
-        } catch (finalErr) {
-          console.warn(
-            `[StemPlayer] finalTrack load failed for "${packId}"; synthetic fanfare fallback:`,
-            finalErr
-          );
-          decodedFinal = null;
-        }
-      } else {
-        decodedFinal = null;
-      }
-
-      if (currentToken !== this.switchPackToken) {
-        return false;
-      }
-
       this.stemBuffers = decodedBuffers;
-      this.finalBuffer = decodedFinal;
+      this.finalBuffer = null;
       this.commonLoopDuration = Math.min(...decodedBuffers.map((b) => b.duration));
       this.fallbackActive = false;
 

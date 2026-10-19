@@ -59,9 +59,8 @@ export const MODULE_MANIFESTS: Record<ModuleName, ModuleManifest> = {
       'audio/stems/stem-2.m4a',
       'audio/stems/stem-3.m4a',
       'audio/stems/stem-4.m4a',
-      'audio/stems/final.mp3',
     ],
-    estimatedBytes: 2985648,
+    estimatedBytes: 2808192,
   },
 };
 
@@ -75,7 +74,6 @@ export const KNOWN_ASSET_SIZES: Record<string, number> = {
   'audio/stems/stem-2.m4a': 702336,
   'audio/stems/stem-3.m4a': 710688,
   'audio/stems/stem-4.m4a': 705792,
-  'audio/stems/final.mp3': 177456,
   'models/face_landmarker.task': 2840000,
 };
 

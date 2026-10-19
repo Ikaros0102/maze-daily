@@ -58,7 +58,9 @@ A complete, browser-native audio navigation engine utilizing the Web Audio API t
   - Collecting the key triggers an ascending 4-note bell chime (C5 $\to$ E5 $\to$ G5 $\to$ C6), momentarily ducks background music, and seamlessly switches navigation targets to the Exit.
   - Active music stems are strictly bounded by overall maze completion percentage (Stem 1 before 25%, Stems 1 & 2 between 25% and 50%, etc.).
 - **Dynamic Audio Packs (Sound Sets):**
-  - 4 distinct soundscapes: *Classic*, *Organic*, *Synth*, and *Clockwork*.
+  - 10 distinct soundscapes: *Classic*, *Organic*, *Synth*, *Clockwork*, *Cosmic*, *Crystal Bell*, *Hey and Ooh*, *Intimate Groove*, *Lo-Fi*, and *Saxophone Solo*.
+  - Each pack features 4 synchronous stems (`stem-1.m4a` through `stem-4.m4a`) seamlessly crossfading according to maze quartile checkpoints.
+  - Victory fanfare is synthesized procedurally via the native Web Audio API, removing the need for a separate final audio file download.
   - Live, click-free 0.5-second crossfading when swapping sound sets during gameplay.
   - Independent Cache API storage buckets (`maze-pack-${packId}-v${version}`) with on-demand background downloading.
 - **Audio Hotkeys:** `[` / `]` or `+` / `-` (10% step volume adjustments) and `M` (mute toggle) with audible feedback tones.

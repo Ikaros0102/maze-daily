@@ -476,22 +476,17 @@ await test('1.3 Manifest definitions, default ID, and complete file paths verifi
   assert.strictEqual(DEFAULT_AUDIO_PACK_ID, 'classic');
 
   const allPacks = getAllAudioPacks();
-  assert.strictEqual(allPacks.length, 4, 'Must register exactly 4 sound packs');
+  assert.strictEqual(allPacks.length, 10, 'Must register exactly 10 sound packs');
 
-  for (const packId of ['classic', 'organic', 'synth', 'clockwork']) {
+  for (const pack of allPacks) {
+    const packId = pack.id;
     assert.strictEqual(isValidAudioPackId(packId), true, `${packId} must be recognized as valid`);
-    const pack = AUDIO_PACKS[packId];
-    assert.ok(pack, `AUDIO_PACKS[${packId}] must be defined`);
+    assert.ok(AUDIO_PACKS[packId], `AUDIO_PACKS[${packId}] must be defined`);
     assert.strictEqual(pack.files.length, 4, `${packId} must contain 4 stems`);
 
     const allPaths = getAudioPackAllFilePaths(pack);
-    if (packId === 'classic') {
-      assert.strictEqual(allPaths.length, 5, 'Classic must contain 4 stems + finalTrack (5 files)');
-      assert.ok(allPaths.includes('audio/stems/final.mp3'), 'Classic must include audio/stems/final.mp3');
-    } else {
-      assert.strictEqual(allPaths.length, 4, `${packId} must contain exactly 4 files`);
-      assert.strictEqual(pack.finalTrack, undefined, `${packId} must have undefined finalTrack`);
-    }
+    assert.strictEqual(allPaths.length, 4, `${packId} must contain exactly 4 files`);
+    assert.strictEqual(pack.finalTrack, undefined, `${packId} must have undefined finalTrack`);
   }
 
   assert.strictEqual(isValidAudioPackId('unknown_pack'), false);
@@ -550,15 +545,15 @@ await test('2.2 isAudioPackCachedAndValid returns false when any stem is missing
   assert.strictEqual(valid, false, 'Partially cached pack (missing stem 3) must return false');
 });
 
-await test('2.3 isAudioPackCachedAndValid returns false when classic is missing final.mp3', async () => {
+await test('2.3 isAudioPackCachedAndValid returns false when classic is missing stem-4.m4a', async () => {
   mockCaches.clear();
   MemoryCacheAdapter.clear();
 
-  // Seed classic but omit final.mp3
-  await seedPackAssets('classic', { omitFile: 'audio/stems/final.mp3' });
+  // Seed classic but omit stem-4.m4a
+  await seedPackAssets('classic', { omitFile: 'audio/stems/stem-4.m4a' });
 
   const valid = await isAudioPackCachedAndValid('classic');
-  assert.strictEqual(valid, false, 'Classic missing final.mp3 must return false');
+  assert.strictEqual(valid, false, 'Classic missing stem-4.m4a must return false');
 });
 
 await test('2.4 isAudioPackCachedAndValid returns false when asset has 0 byteLength or 0 content-length', async () => {
@@ -1014,28 +1009,32 @@ await test('4.3 Topological progress resynchronization across quartiles (0.0, 0.
   }
 });
 
-await test('4.4 Fanfare handling: classic plays final.mp3; packs without finalTrack delegate to SineFallbackSynthesizer', async () => {
+await test('4.4 Fanfare handling: victory fanfare delegates to synthetic SineFallbackSynthesizer cleanly across packs', async () => {
   const ctx = new MockAudioContext();
   const dest = ctx.createGain();
   const player = new StemPlayer();
   await player.init(ctx, dest);
 
-  // 1. Classic has finalTrack -> loads finalBuffer
+  // 1. Classic pack
   await seedPackAssets('classic');
   await player.switchPack('classic');
-  assert.ok(player.finalBuffer !== null, 'Classic must populate finalBuffer');
+  assert.strictEqual(player.finalBuffer, null, 'Classic finalBuffer must be null');
 
   // Trigger victory fanfare on classic
-  player.playFinalFanfare();
+  let classicFanfareThrew = false;
+  try {
+    player.playFinalFanfare();
+  } catch {
+    classicFanfareThrew = true;
+  }
+  assert.strictEqual(classicFanfareThrew, false, 'Classic playFinalFanfare executes cleanly');
   assert.strictEqual(player.getState(), 'stopped');
-  assert.ok(player.fanfareSource !== null, 'Classic creates buffer source for final.mp3');
 
-  // 2. Organic has NO finalTrack -> finalBuffer is null
+  // 2. Organic pack -> delegates to SineFallback cleanly
   await seedPackAssets('organic');
   await player.switchPack('organic');
   assert.strictEqual(player.finalBuffer, null, 'Organic finalBuffer must be null');
 
-  // Trigger victory fanfare on organic -> fallback synthesized cleanly without throw
   let fanfareThrew = false;
   try {
     player.playFinalFanfare();
@@ -1044,10 +1043,6 @@ await test('4.4 Fanfare handling: classic plays final.mp3; packs without finalTr
   }
   assert.strictEqual(fanfareThrew, false, 'Organic playFinalFanfare must execute without exception');
   assert.strictEqual(player.getState(), 'stopped');
-
-  // 3. Switch back to classic restores finalBuffer
-  await player.switchPack('classic');
-  assert.ok(player.finalBuffer !== null, 'Returning to classic restores finalBuffer');
 });
 
 await test('4.5 Safe Symbol & bad ID handling, rapid concurrency cancellation, and network drop try-catch', async () => {

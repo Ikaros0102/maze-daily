@@ -99,7 +99,7 @@ export const AUDIO_PACKS: Record<AudioPackId, AudioPack> = {
   },
   'intimate-groove': {
     id: 'intimate-groove',
-    nameKey: 'audioPackIntimateGroove',
+    nameKey: 'audioPackChillout',
     version: '1.0.0',
     folder: 'audio/packs/Intimate Groove',
     files: ['stem-1.m4a', 'stem-2.m4a', 'stem-3.m4a', 'stem-4.m4a'],

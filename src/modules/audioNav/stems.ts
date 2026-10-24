@@ -425,6 +425,7 @@ export class StemPlayer implements StemPlayerController {
   private switchPackToken = 0;
   private crossfadeTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private crossfadeResolve: (() => void) | null = null;
+  private pendingStart = false;
 
   constructor(config?: StemPlayerConfig) {
     this.crossfadeCurve = config?.crossfadeCurve ?? 'equal-power';
@@ -571,6 +572,10 @@ export class StemPlayer implements StemPlayerController {
 
     if (this.forceFallback) {
       this.activateFallback();
+      if (this.pendingStart) {
+        this.pendingStart = false;
+        this.start();
+      }
       return;
     }
 
@@ -579,6 +584,10 @@ export class StemPlayer implements StemPlayerController {
       const buffers = await Promise.all(
         STEM_FILE_PATHS.map((path) => this.loadBuffer(path))
       );
+
+      if (this.sineFallback) {
+        this.sineFallback.stop();
+      }
 
       this.stemBuffers = buffers;
       this.commonLoopDuration = Math.min(...buffers.map((b) => b.duration));
@@ -593,6 +602,11 @@ export class StemPlayer implements StemPlayerController {
         stemLoadErr
       );
       this.activateFallback();
+    }
+
+    if (this.pendingStart) {
+      this.pendingStart = false;
+      this.start();
     }
   }
 
@@ -631,6 +645,11 @@ export class StemPlayer implements StemPlayerController {
   public start(): void {
     if (this.state === 'playing' || !this.ctx) return;
 
+    if (this.state === 'loading') {
+      this.pendingStart = true;
+      return;
+    }
+
     const currentGains = calculateQuartileGains(this.currentProgress, this.crossfadeCurve);
 
     if (this.fallbackActive) {
@@ -650,6 +669,9 @@ export class StemPlayer implements StemPlayerController {
     }
 
     this.stopSources();
+    if (this.sineFallback) {
+      this.sineFallback.stop();
+    }
 
     const now = this.ctx.currentTime;
     const syncStartTime = now + 0.05; // 50ms scheduling lookahead
@@ -854,6 +876,7 @@ export class StemPlayer implements StemPlayerController {
   }
 
   public pause(): void {
+    this.pendingStart = false;
     this.stopSources();
     if (this.fallbackActive && this.sineFallback) {
       this.sineFallback.stop();
@@ -862,6 +885,7 @@ export class StemPlayer implements StemPlayerController {
   }
 
   public stop(): void {
+    this.pendingStart = false;
     if (this.fadeTimeoutId !== null) {
       clearTimeout(this.fadeTimeoutId);
       this.fadeTimeoutId = null;
@@ -985,9 +1009,10 @@ export class StemPlayer implements StemPlayerController {
     }
 
     // 4. Playing State & 0.5s Crossfade Fadeout
-    const wasPlaying = this.state === 'playing';
+    const wasPlaying = this.state === 'playing' || this.pendingStart;
     const isRunning = this.ctx !== null && this.ctx.state === 'running';
-    const shouldCrossfade = wasPlaying && isRunning && this.stemsBus !== null;
+    const shouldCrossfade = this.state === 'playing' && isRunning && this.stemsBus !== null;
+    this.pendingStart = false;
 
     if (shouldCrossfade && this.ctx && this.stemsBus) {
       const now = this.ctx.currentTime;

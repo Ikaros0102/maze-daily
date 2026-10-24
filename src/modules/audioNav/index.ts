@@ -79,21 +79,40 @@ export class AudioNavManager implements AudioNavController {
       void this.stemPlayer.load().then(() => {
         if (this.active) {
           this.stemPlayer.start();
+          this.syncBeaconPulseState();
         }
       });
-
-      this.beaconSynthesizer.start();
     }
 
     this.volumeController.attach();
     this.active = true;
+    this.syncBeaconPulseState();
   }
 
   public async resume(): Promise<void> {
     await this.engine.resume();
     if (this.active && this.engine.getState().isRunning) {
       this.stemPlayer.start();
+      this.syncBeaconPulseState();
+    }
+  }
+
+  /**
+   * Synchronizes the periodic metronome pulse of BeaconSynthesizer.
+   * When a music pack is loaded (or loading) and playing, the periodic clicking/ping
+   * timer is stopped because the music stems themselves provide directional audio navigation.
+   * The beacon pulse timer only starts if stem loading failed and fallback mode is active.
+   */
+  private syncBeaconPulseState(): void {
+    if (!this.active || !this.engine.getState().isRunning) {
+      this.beaconSynthesizer.stop();
+      return;
+    }
+
+    if (this.stemPlayer.isUsingFallback()) {
       this.beaconSynthesizer.start();
+    } else {
+      this.beaconSynthesizer.stop();
     }
   }
 
@@ -104,6 +123,8 @@ export class AudioNavManager implements AudioNavController {
     checkpoints?: SplitCheckpoint[]
   ): void {
     if (!this.active) return;
+
+    this.syncBeaconPulseState();
 
     // Detect key pickup transition (hasKey false -> true)
     const currentHasKey = effect?.type === 'key_and_gate' ? Boolean(effect.hasKey) : null;
@@ -266,7 +287,9 @@ export class AudioNavManager implements AudioNavController {
     packId: string,
     onProgress?: (pct: number) => void
   ): Promise<boolean> {
-    return await this.stemPlayer.switchPack(packId, onProgress);
+    const ok = await this.stemPlayer.switchPack(packId, onProgress);
+    this.syncBeaconPulseState();
+    return ok;
   }
 
   public getCurrentPackId(): string {

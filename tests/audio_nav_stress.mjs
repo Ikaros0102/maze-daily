@@ -1284,6 +1284,16 @@ console.log('\n--- Suite 7: Directional Exit Music Routing, Panning, Lowpass Fil
   expectEqual(suspendedManager.getStemPlayer().getCurrentPan(), 1.0, 'Suspended AudioContext computes initial pan on start position');
   suspendedManager.destroy();
 
+  // 7.8 Metronome Beacon Pulse Suppressed When Music Pack Is Loaded & Playing
+  const stemRef = manager.getStemPlayer();
+  stemRef['fallbackActive'] = false;
+  stemRef['state'] = 'playing';
+  await manager.resume();
+  manager.updatePlayerPosition({ x: 0.5, y: 2.5 }, testMaze);
+  expectEqual(manager['beaconSynthesizer']['isRunning'], false, 'Beacon metronome pulse is stopped when music pack is active');
+  expectEqual(manager['beaconSynthesizer']['timerId'], null, 'Beacon interval timer is cleared when music pack is active');
+  expectEqual(stemRef.getCurrentPan(), 1.0, 'Music panner still updates directionally while beacon metronome is off');
+
   manager.destroy();
   player.destroy();
 }

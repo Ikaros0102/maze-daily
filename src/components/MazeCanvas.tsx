@@ -32,11 +32,74 @@ export const MazeCanvas: React.FC<MazeCanvasProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sizeRef = useRef<{ w: number; h: number }>({ w: 600, h: 600 });
+  const latestPropsRef = useRef({
+    grid,
+    playerPos,
+    playerColor,
+    start,
+    exit,
+    checkpoints,
+    effect,
+    isDarkTheme,
+  });
+
+  useEffect(() => {
+    latestPropsRef.current = {
+      grid,
+      playerPos,
+      playerColor,
+      start,
+      exit,
+      checkpoints,
+      effect,
+      isDarkTheme,
+    };
+  }, [grid, playerPos, playerColor, start, exit, checkpoints, effect, isDarkTheme]);
 
   useEffect(() => {
     const container = containerRef.current;
     const canvas = canvasRef.current;
     if (!container || !canvas) return;
+
+    const applySizeAndDraw = (width: number, height: number) => {
+      const side = Math.min(width, height);
+      if (side <= 0) return;
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      sizeRef.current = { w: side, h: side };
+
+      canvas.width = Math.floor(side * dpr);
+      canvas.height = Math.floor(side * dpr);
+      canvas.style.width = `${Math.floor(side)}px`;
+      canvas.style.height = `${Math.floor(side)}px`;
+
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(dpr, dpr);
+        const p = latestPropsRef.current;
+        renderMazeScene({
+          ctx,
+          width: side,
+          height: side,
+          grid: p.grid,
+          playerPos: p.playerPos,
+          playerColor: p.playerColor,
+          start: p.start,
+          exit: p.exit,
+          checkpoints: p.checkpoints,
+          effect: p.effect,
+          isDarkTheme: p.isDarkTheme,
+          timeMs: performance.now(),
+        });
+      }
+    };
+
+    // Synchronously size canvas on initial mount so first frame is full resolution
+    const rect = container.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      applySizeAndDraw(rect.width, rect.height);
+    }
 
     let resizeTimeout: number | undefined;
 
@@ -46,24 +109,7 @@ export const MazeCanvas: React.FC<MazeCanvasProps> = ({
       resizeTimeout = window.setTimeout(() => {
         const entry = entries[0];
         if (!entry) return;
-
-        const { width, height } = entry.contentRect;
-        const side = Math.min(width, height);
-        if (side <= 0) return;
-
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        sizeRef.current = { w: side, h: side };
-
-        canvas.width = Math.floor(side * dpr);
-        canvas.height = Math.floor(side * dpr);
-        canvas.style.width = `${Math.floor(side)}px`;
-        canvas.style.height = `${Math.floor(side)}px`;
-
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.setTransform(1, 0, 0, 1, 0, 0);
-          ctx.scale(dpr, dpr);
-        }
+        applySizeAndDraw(entry.contentRect.width, entry.contentRect.height);
       }, 30);
     });
 

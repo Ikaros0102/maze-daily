@@ -1,6 +1,8 @@
 import { GAME_CONFIG, type EffectMeta } from '../config/gameConfig';
+import { CURVED_MAZE_PATTERNS } from './mazeGenerator';
 import { getPassableNeighbors } from './pathfinder';
 import type {
+  CurvedMazePattern,
   DailyEffectState,
   GridCoord,
   MazeCell,
@@ -235,7 +237,8 @@ export function generateDailyEffect(
   grid: MazeCell[][],
   start: GridCoord,
   exit: GridCoord,
-  shortestPath: GridCoord[]
+  shortestPath: GridCoord[],
+  curvedPatternOverride?: CurvedMazePattern
 ): DailyEffectState {
   const rows = grid.length;
   const cols = grid[0].length;
@@ -336,6 +339,8 @@ export function generateDailyEffect(
     state.glitchStatic = false;
     state.glitchNextSec = GAME_CONFIG.glitch.intervalSec;
     state.glitchCycle = 0;
+  } else if (chosenMeta.type === 'curved_labyrinth') {
+    state.curvedPattern = curvedPatternOverride ?? spawnRng.pick(CURVED_MAZE_PATTERNS);
   }
 
   return state;

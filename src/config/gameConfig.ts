@@ -87,6 +87,13 @@ export const AVAILABLE_EFFECTS: EffectMeta[] = [
     descriptionKey: 'effects.weave.desc',
   },
   {
+    type: 'curved_labyrinth',
+    enabled: true,
+    icon: '🌀',
+    nameKey: 'effects.curved.name',
+    descriptionKey: 'effects.curved.desc',
+  },
+  {
     type: 'portals',
     enabled: true,
     icon: '🌀',

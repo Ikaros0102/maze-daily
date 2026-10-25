@@ -315,6 +315,65 @@ console.log('\n--- SUITE 5: Effects Balancing (Fake Exits & Key and Gate) ---');
   console.log(`  ✓ 5.2: Fake exits successfully tested across ${fakeExitsTested} mazes with >= 45% distance filtering`);
 }
 
+// ----------------------------------------------------
+// SUITE 6: Weave Labyrinth Bridges (25-35) & Curved Labyrinth Patterns
+// ----------------------------------------------------
+console.log('\n--- SUITE 6: Weave Labyrinth Bridges (25-35) & Curved Labyrinth Patterns ---');
+
+{
+  const types = AVAILABLE_EFFECTS.map((e) => e.type);
+  assert(types.includes('curved_labyrinth'), 'curved_labyrinth must be registered in AVAILABLE_EFFECTS');
+  const curvedMeta = AVAILABLE_EFFECTS.find((e) => e.type === 'curved_labyrinth');
+  assert.equal(curvedMeta?.icon, '🌀', 'Curved labyrinth icon must be 🌀');
+
+  // Verify localization across all 8 languages for curved_labyrinth
+  const supportedLangs = ['en', 'ru', 'es', 'zh', 'ja', 'de', 'tr', 'pt'];
+  for (const lang of supportedLangs) {
+    const t = TRANSLATIONS[lang];
+    assert(t.effects.curved_labyrinth, `effects.curved_labyrinth must exist for ${lang}`);
+    assert(t.effects.curved_labyrinth.name && t.effects.curved_labyrinth.name.length > 0, `curved_labyrinth.name for ${lang} must not be empty`);
+    assert(t.effects.curved_labyrinth.desc && t.effects.curved_labyrinth.desc.length > 0, `curved_labyrinth.desc for ${lang} must not be empty`);
+  }
+
+  // Verify Weave Labyrinth generates 25-35 bridges across 20 seeds
+  for (let seed = 1; seed <= 20; seed++) {
+    const rng = createRNG(`weave_seed_${seed}`);
+    const grid = generateMazeGrid(25, 25, rng, { effectType: 'weave_labyrinth' });
+    let bridgeCount = 0;
+    for (let r = 0; r < 25; r++) {
+      for (let c = 0; c < 25; c++) {
+        if (grid[r][c].bridge === 'horizontal_over' || grid[r][c].bridge === 'vertical_over') {
+          bridgeCount++;
+          assert.equal(grid[r][c].walls.top, false);
+          assert.equal(grid[r][c].walls.right, false);
+          assert.equal(grid[r][c].walls.bottom, false);
+          assert.equal(grid[r][c].walls.left, false);
+        }
+      }
+    }
+    assert(
+      bridgeCount >= 25 && bridgeCount <= 35,
+      `Weave labyrinth must generate 25-35 bridges (seed ${seed} got ${bridgeCount})`
+    );
+  }
+
+  // Verify Curved Labyrinth generates valid navigable mazes across all 5 geometric patterns
+  const patterns = ['spiral', 'double_spiral', 'zigzag_angled', 'concentric_tree', 'organic_wave'];
+  for (const pattern of patterns) {
+    const rng = createRNG(`curved_${pattern}`);
+    const grid = generateMazeGrid(25, 25, rng, {
+      effectType: 'curved_labyrinth',
+      curvedPattern: pattern,
+    });
+    const nav = analyzeMazeNavigation(grid);
+    assert(nav.shortestPath.length > 20, `Curved labyrinth (${pattern}) must have a valid path`);
+  }
+
+  console.log('  ✓ 6.1: Weave labyrinth consistently generates 25-35 4-way crossover bridges');
+  console.log('  ✓ 6.2: Curved labyrinth registered with 🌀 icon and 8-language localization');
+  console.log('  ✓ 6.3: All 5 curved geometric DFS patterns generate valid navigable mazes');
+}
+
 console.log('\n========================================');
 console.log('ALL EFFECTS 2.0 STRESS TESTS PASSED!');
 console.log('========================================\n');

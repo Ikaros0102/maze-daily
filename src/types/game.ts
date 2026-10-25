@@ -15,10 +15,20 @@ export interface CellWalls {
   left: boolean;
 }
 
+export type WeaveBridgeOrientation = 'horizontal_over' | 'vertical_over';
+
+export type CurvedMazePattern =
+  | 'spiral'
+  | 'double_spiral'
+  | 'zigzag_angled'
+  | 'concentric_tree'
+  | 'organic_wave';
+
 export interface MazeCell {
   col: number;
   row: number;
   walls: CellWalls;
+  bridge?: WeaveBridgeOrientation;
 }
 
 export interface MazeData {
@@ -48,6 +58,7 @@ export type EffectType =
   | 'inversion'
   | 'fake_exits'
   | 'weave_labyrinth'
+  | 'curved_labyrinth'
   | 'glitch'
   | 'switches_and_barriers';
 
@@ -87,6 +98,7 @@ export interface DailyEffectState {
   glitchStatic?: boolean;
   glitchNextSec?: number;
   glitchCycle?: number;
+  curvedPattern?: CurvedMazePattern;
 }
 
 export type BreadcrumbPoint = [x: number, y: number, timeMs: number];

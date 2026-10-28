@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ikaros0102.github.io/maze-daily/sitemap.xml

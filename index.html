@@ -2,11 +2,95 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#0b0c10" />
-    <meta name="description" content="Daily deterministic maze speedrun game in your browser" />
-    <title>Maze Daily - Daily Maze Speedrun</title>
+
+    <!-- Primary SEO Meta Tags -->
+    <title>Maze Daily — Daily Maze Puzzle</title>
+    <meta name="title" content="Maze Daily — Daily Maze Puzzle" />
+    <meta
+      name="description"
+      content="Play Maze Daily — a free daily maze game and Wordle-like puzzle. Speedrun procedural labyrinths, compete on global daily seeds, or play eyes-free with spatial audio navigation (audio game for the blind) and hands-free head tracking."
+    />
+    <meta
+      name="keywords"
+      content="daily maze game, wordle-like puzzle, speedrun labyrinth, audio game for the blind, daily puzzle game, labyrinth speedrun, accessible web game, spatial audio game, head tracking game, browser maze"
+    />
+    <meta name="author" content="Maze Daily" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://ikaros0102.github.io/maze-daily/" />
+
+    <!-- PWA & Icons -->
+    <meta name="theme-color" content="#080c14" />
+    <meta name="application-name" content="Maze Daily" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Maze Daily" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Open Graph / Facebook / Discord / Telegram -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Maze Daily" />
+    <meta property="og:url" content="https://ikaros0102.github.io/maze-daily/" />
+    <meta property="og:title" content="Maze Daily — Daily Maze Puzzle" />
+    <meta
+      property="og:description"
+      content="Solve a new procedural labyrinth every day! A Wordle-like daily maze game built for speedrunners, featuring daily modifiers, spatial audio navigation (audio game for the blind), and hands-free head tracking."
+    />
+    <meta property="og:image" content="https://ikaros0102.github.io/maze-daily/og-preview.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Maze Daily — Daily Maze Puzzle gameplay preview with neon labyrinth and live speedrun splits"
+    />
+
+    <!-- Twitter / X Large Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://ikaros0102.github.io/maze-daily/" />
+    <meta name="twitter:title" content="Maze Daily — Daily Maze Puzzle" />
+    <meta
+      name="twitter:description"
+      content="A free daily maze game and Wordle-like speedrun labyrinth with daily modifiers, spatial audio for blind players, and hands-free head tracking."
+    />
+    <meta name="twitter:image" content="https://ikaros0102.github.io/maze-daily/og-preview.png" />
+    <meta
+      name="twitter:image:alt"
+      content="Maze Daily — Daily Maze Puzzle gameplay preview"
+    />
+
+    <!-- Structured Data (Schema.org VideoGame & WebApplication) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": ["VideoGame", "WebApplication"],
+        "name": "Maze Daily — Daily Maze Puzzle",
+        "alternateName": "Maze Daily",
+        "url": "https://ikaros0102.github.io/maze-daily/",
+        "image": "https://ikaros0102.github.io/maze-daily/og-preview.png",
+        "description": "Daily deterministic maze speedrun game and Wordle-like labyrinth puzzle featuring daily modifiers, spatial audio navigation for blind players, and hands-free head tracking.",
+        "genre": ["Puzzle", "Maze", "Speedrun", "Daily Game", "Audio Game"],
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Web Browser",
+        "playMode": "SinglePlayer",
+        "inLanguage": ["en", "ru", "es", "zh", "ja", "de", "tr", "pt"],
+        "accessibilityFeature": [
+          "spatialAudioNavigation",
+          "audioDescription",
+          "headTrackingControl",
+          "highContrastDisplay",
+          "ARIA"
+        ],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
